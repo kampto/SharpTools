@@ -1,14 +1,35 @@
-<!- kampto, April08-2021 ->
+<!-- kampto  ver. April25-2021, for SharpTools -->
 <!-- Do not edit below -->
 <script type="application/json" id="tile-settings">
 {
   "schema": "0.1.0",
   "settings": [
-    {"type": "STRING", "name": "apiSample", "label": "Sample Maker API URL"},
-    {"name": "deviceId", "type": "STRING", "label": "Device ID"},
-    {"type": "STRING", "label": "Label (optional)", "name": "gaugeLabel"}
+    {"label": "Sample Maker API URL", "name": "apiSample", "type": "STRING"},
+    {"label": "Device ID", "type": "STRING", "name": "deviceId"},
+    {
+      "label": "GaugeLabel (default=Volts)",
+      "type": "STRING",
+      "name": "gaugeLabel"
+    },
+    {"label": "Units (default=V)", "name": "gaugeUnits", "type": "STRING"},
+    {
+      "label": "Number of Decimals (default = 2)",
+      "name": "numDecimals",
+      "type": "STRING"
+    },
+    {
+      "name": "refreshInterv",
+      "type": "NUMBER",
+      "label": "Refresh Interval Minutes (default = 10)"
+    },
+    {
+      "label": "If multiple attributes select another,  0 to 4 (default = 0)",
+      "name": "hubAttribute",
+      "type": "NUMBER"
+    }
   ],
-  "name": "BatteryGauge"
+  "name": "Gauge 12V",
+  "dimensions": {"width": 2, "height": 2}
 }
 </script>
 <!-- Do not edit above -->
@@ -24,24 +45,26 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <div id="chart" align="center"></div>
 <script>
-  //stub a variable to hold the settings at a higher scope
+
+//Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
   var tileSettings = { 
     // apiSample: "https://cloud.hubitat.com/api/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/apps/999/devices?access_token=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-    // deviceId: "67",
-    // attribute: "visualWithText"
-  }
+    // deviceId: "185",
+ }
   var apiSettings = {};
   
-//********************* SET UP CHART BOUNDARYS *********************
-  var chart, chartData; 
+//********************* SET UP GAUGE BOUNDARYS *********************
+//******************************************************************  
+  var chart, chartData;
   var chartOptions = {
-    min: 10.5, max: 15,
+    min: 10.5, max: 14.5,
     redFrom: 10.5, redTo: 11.5,
     yellowFrom:11.5, yellowTo: 12.0,
-    greenFrom:12.0, greenTo: 15,
-    minorTicks: 1
+    greenFrom:12.0, greenTo: 14.5,
+    minorTicks: 5
   };
 //*******************************************************************
+//*******************************************************************  
   
   //Load gauge script
   google.charts.load('current', {'packages':['gauge']});  
@@ -49,8 +72,7 @@
   
   stio.ready(function(data){
     //get the settings from the callback
-    tileSettings = data.settings; //apiSample, deviceId, gaugeLabel
-    
+    tileSettings = data.settings; //apiSample, deviceId, label
     //and initialize the tile
     init();
   });
@@ -63,8 +85,7 @@
       return showError("Device ID is not set");
     } 
 
-    
-    //make a call to the Hubitat API to get some data
+//Call data from Hubitat Maker API then tiem out till next call
     valuePollingScheduler();
   }
 
@@ -110,34 +131,53 @@
   
   function initChart() {
     console.log("Initialize Google Chart");
+    
     chartData = google.visualization.arrayToDataTable([
       ['Label', 'Value'],
-      ['Battery', 0],
-    ]);    
-   
+//**************** SET UP Default Gauge Center Label **************
+      ['Volts', 0], // Default inside gauge label
+
+    ]);  
     chart = new google.visualization.Gauge(document.getElementById('chart'));
   }
   
   function getDeviceValue(){  
     var url = getBaseUrl() + `/devices/${tileSettings.deviceId}`
     var config = getAxiosConfig();
-  
-    //Getting the device's battery reading using Hubitat Maker API
+	
+// Set up Units
+    var gaugeUnitsDisplay = tileSettings.gaugeUnits
+    if(tileSettings.gaugeUnits == null || tileSettings.gaugeUnits == "")
+//********************** SET UP Default Units ********************
+    {gaugeUnitsDisplay = "V";}  // Default unit if no entry
+
+// Set up number of decimals
+    var numDeciamlsDisplay = tileSettings.numDecimals
+    if (tileSettings.numDecimals == "0") {numDecimalsDisplay = "#";}
+    else if (tileSettings.numDecimals == "1") {numDecimalsDisplay = "#.#";}
+    else if (tileSettings.numDecimals == "3") {numDecimalsDisplay = "#.###";}
+    else {numDecimalsDisplay = "#.##";}  // Default if no entry
+    
+// Getting the device's attribute reading using Hubitat Maker API
+    var hubAttributeDisplay = tileSettings.hubAttribute
+    if(tileSettings.hubAttribute == null || tileSettings.hubAttribute == "")
+    {hubAttributeDisplay = "0";}  // Default 0 if no entry
+    
     axios.get(url, config).then(function(res){
-        var value = res.data.attributes[0].currentValue;
+        var value = res.data.attributes[hubAttributeDisplay].currentValue;
         console.log(`Received battery reading: ${value}`);
-      
         //Set chart value and draw chart
         if(chart && chartData){
           chartData.setValue(0, 1, value);
-          
-//******************* SET UP UNITS AND DECIMALS *********************
+
+// Apply Units and Decimals
 		var formatter = new google.visualization.NumberFormat(
-    		{suffix: 'v',pattern:'#.##'}  // units and decimals
+          {suffix: gaugeUnitsDisplay ,pattern:numDecimalsDisplay}  // Edit units and decimal places
+        
 		);
-    	formatter.format(chartData,1);
-//*******************************************************************
-        //if the user provided a label, use it
+        formatter.format(chartData,1);
+
+// Apply new gauge center label if entered in tile editor
           if(tileSettings.gaugeLabel != null && tileSettings.gaugeLabel != ""){
             chartData.setValue(0, 0, tileSettings.gaugeLabel);
           }
@@ -150,7 +190,11 @@
   
   function valuePollingScheduler(){
     getDeviceValue();
+    var refreshIntervCalc = tileSettings.refreshInterv
+    if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
+    	{refreshIntervCalc = 10;}  // Default 10 minuts unit if no entry
     console.log("polling value in 5 minutes");
-    setTimeout(valuePollingScheduler, 300000);
+    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
   }
 </script>
+ 
