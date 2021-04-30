@@ -9,15 +9,15 @@ Select HTML, not URL
 
 Copy and Past all the HTML code from here to the sharptool HTML editor
 
-If Resolve box pops up hit resolve to all the radio buttons on right side
+If Resolve box pops up hit resolve to all the radio buttons on right side, hit resolve
 
 Give it a name at the top
 
-Open "additional configuration" and set tile size. Select label if you want Tile title label option
+Open "additional configuration" and set tile size. Select label if you want Tile title label option. you must do this.
 
 Hit update and/or save below the HTML editor
 
-Add new custom tile to dashboard and set up per SharpTools link above.
+Add new custom tile to dashboard and set up per SharpTools link above in post #1
 
 
 Notes:.................
