@@ -1,7 +1,7 @@
-# SharpTools
+# SharpTools 
 Reference set up for Sharptools Tiles and Hubitat link:  https://community.sharptools.io/t/hubitat-gauge-tile/6595
 
-Procedure to load this HTML:................
+Procedure to load this HTML Custom Tile:................
 
 Create a new Custom Tile in Developers tools of Sharptools
 
