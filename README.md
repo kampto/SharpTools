@@ -25,3 +25,5 @@ Notes:.................
 Zero values at the end of a number wont show up. So if you change the deciamls and nothing happens then the last values are likely zeros
 
 You can easly change the gauge max/min value and color band positions by looking in the HTML coade and modifying it. Its labbeled in th HTML
+
+If you get no value or the wrong value chnage the attribute number in the tile editor.
