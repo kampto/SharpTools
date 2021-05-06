@@ -4,21 +4,21 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"label": "Sample Maker API URL", "type": "STRING", "name": "apiSample"},
-    {"type": "STRING", "label": "Device ID", "name": "deviceId"},
+    {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
+    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
     {
       "name": "refreshInterv",
-      "label": "Refresh Interval Minutes (default = 10)",
-      "type": "NUMBER"
+      "type": "NUMBER",
+      "label": "Refresh Interval Minutes (default = 10)"
     },
     {
       "name": "hubAttribute",
-      "type": "NUMBER",
-      "label": "If multiple attributes select another,  0 to 5 (default = 0)"
+      "label": "If multiple attributes select another,  0 to 9 (default = 0)",
+      "type": "NUMBER"
     }
   ],
   "name": "Tank Level",
-  "dimensions": {"height": 2, "width": 2}
+  "dimensions": {"width": 2, "height": 2}
 }
 </script>
 <!-- Do not edit above -->
@@ -37,11 +37,11 @@
 <div id="ac_style_samples-bct-pointers-and-data-tank-16" style="display:none;">
   
 html, body, #container {
-    width: 32%;  
-    height: 40%; 
+    width: 27%;  
+    height: 32%; 
     margin: 0;
     padding: 0;
-  	padding-top: 5px;
+  	padding-top: 4px;
     }  
 </div>
    
@@ -172,12 +172,7 @@ anychart.onDocumentReady(function () {
   var scale = gauge.scale();
   scale.minimum(0);
   scale.maximum(100);
-  
-  // Set scale 
-  var scale = anychart.scales.linear();
-  scale.minimum(0);
-  scale.maximum(100);
-  scale.ticks().interval(10);
+  scale.ticks().interval(5);
 
   // Add axis with custom labels
   var axis = gauge.axis(0);
