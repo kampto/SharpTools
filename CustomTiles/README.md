@@ -31,4 +31,5 @@ NOTES:.................
 
 
 ATTRIBUTE NAMES:  Open the Hubitat Device to see what attributes are availible.
+
 ![image](https://user-images.githubusercontent.com/31904505/117594195-6cde1500-b0f2-11eb-9de6-e6bbf0a7bc32.png)
