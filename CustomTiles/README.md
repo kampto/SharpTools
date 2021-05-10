@@ -29,3 +29,6 @@ NOTES:.................
 
 	TANK LEVEL: You might need to chnage the width, height, and padding in the code to center the gauge in the tile. If you get no value or the wrong value chnage the attribute number in the tile editor.
 
+
+ATTRIBUTE NAMES:  Open the Hubitat Device to see what attributes are availible.
+![image](https://user-images.githubusercontent.com/31904505/117594195-6cde1500-b0f2-11eb-9de6-e6bbf0a7bc32.png)
