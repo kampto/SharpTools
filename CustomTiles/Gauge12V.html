@@ -1,99 +1,102 @@
 <!-- kampto  ver. April25-2021, for SharpTools -->
-<!-- Do not edit below -->
+<!-- Do not edit Below -->
 <script type="application/json" id="tile-settings">
 {
   "schema": "0.1.0",
   "settings": [
-    {"label": "Sample Maker API URL", "name": "apiSample", "type": "STRING"},
-    {"label": "Device ID", "type": "STRING", "name": "deviceId"},
+    {"name": "apiSample", "label": "Sample Maker API URL", "type": "STRING"},
+    {"type": "STRING", "label": "Device ID", "name": "deviceId"},
+    {"type": "STRING", "name": "attribute", "label": "Enter Attribute name"},
     {
-      "label": "GaugeLabel (default=Volts)",
       "type": "STRING",
+      "label": "GaugeLabel (default = Volts)",
       "name": "gaugeLabel"
     },
-    {"label": "Units (default=V)", "name": "gaugeUnits", "type": "STRING"},
+    {"type": "STRING", "name": "gaugeUnits", "label": "Units (default = V)"},
     {
-      "label": "Number of Decimals (default = 2)",
       "name": "numDecimals",
+      "label": "Number of Decimals (default = 2)",
       "type": "STRING"
     },
     {
-      "name": "refreshInterv",
       "type": "NUMBER",
-      "label": "Refresh Interval Minutes (default = 10)"
-    },
-    {
-      "label": "If multiple attributes select another,  0 to 4 (default = 0)",
-      "name": "hubAttribute",
-      "type": "NUMBER"
+      "label": "Refresh Interval Minutes (default = 10)",
+      "name": "refreshInterv"
     }
   ],
   "name": "Gauge 12V",
   "dimensions": {"width": 2, "height": 2}
 }
 </script>
-<!-- Do not edit above -->
-<style>
-  html, body { height: 100% };
-  #chart { height: 100%; width: 100%;}
-</style>
-
+<!-- Do not edit Above -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 <script src="https://cdn.sharptools.io/js/custom-tiles.js"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<div id="chart" align="center"></div>
-<script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<div id="chart" aliign="center"></div>
 
-//Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
-  var tileSettings = { 
-    // apiSample: "https://cloud.hubitat.com/api/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/apps/999/devices?access_token=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-    // deviceId: "185",
- }
-  var apiSettings = {};
-  
-//********************* SET UP GAUGE BOUNDARYS *********************
-//******************************************************************  
-  var chart, chartData;
-  var chartOptions = {
+<style>
+  /*************** SET GAUGE SIZE WITIN TILE ***************/
+  html,body {height: 107%; margin:-2.2%; justify-content: center;}
+  #chart { height: 100%; width: 100%; }
+</style>
+
+<script>
+  /***************** SET UP GAUGE BOUNDARYS ****************/
+   	var chart, chartData;
+  	var chartOptions = {
     min: 10.5, max: 14.5,
     redFrom: 10.5, redTo: 11.5,
     yellowFrom:11.5, yellowTo: 12.0,
     greenFrom:12.0, greenTo: 14.5,
-    minorTicks: 5
-  };
-//*******************************************************************
-//*******************************************************************  
+    minorTicks: 5,
+    majorTicks: ['10.5', '11.5', '12.5', '13.5', '14.5'], // Major ticks adds Labels to the ticks
+  	};
+  
+  //Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
+  var tileSettings = { 
+    // apiSample: "https://cloud.hubitat.com/api/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/apps/999/devices?access_token=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+    // deviceId: "185",
+    // attribute: "temperature"
+    }
+  var apiSettings = {};
   
   //Load gauge script
   google.charts.load('current', {'packages':['gauge']});  
   google.charts.setOnLoadCallback(initChart);  
   
+  //get the content element so we can update it later
+  var contentEl = document.getElementById("chart");
+  //when the tile is ready, get the settings from the callback
   stio.ready(function(data){
-    //get the settings from the callback
-    tileSettings = data.settings; //apiSample, deviceId, label
-    //and initialize the tile
-    init();
+    tileSettings = data.settings; //apiSample, deviceId, attribute
+    init();  //and initialize the tile
   });
-
+ 
   function init(){
     //parse the relevant settings out of the apiSample
     parseApiSample();
-
-    if(tileSettings.deviceId == null || tileSettings.deviceId == ""){
-      return showError("Device ID is not set");
-    } 
-
-//Call data from Hubitat Maker API then tiem out till next call
     valuePollingScheduler();
+    }
+  
+//******************** REFRESH INTERVAL ************************/  
+  function valuePollingScheduler(){
+    refresh().then(function(){
+    var refreshIntervCalc = tileSettings.refreshInterv
+    if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
+    	{refreshIntervCalc = 10;}  // Default 10 minutes if no entry
+    console.log("polling value in minutes");
+    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
+  });
   }
 
   //helper method for logging an error to console, showing a toast, and updating the tile to display 'Error'
   function showError(message){
     console.error(message);
     stio.showToast(message, "red");
-    document.getElementById("chart").innerHTML = "Error";
+    contentEl.innerText = "Error";
   }
 
   //parse out the various components from a provided Maker API URL
@@ -128,73 +131,79 @@
   function getAxiosConfig(){
     return {params: {access_token: apiSettings.token}};
   }
-  
-  function initChart() {
+
+function initChart() {
     console.log("Initialize Google Chart");
-    
     chartData = google.visualization.arrayToDataTable([
       ['Label', 'Value'],
-//**************** SET UP Default Gauge Center Label **************
+//**************** SET UP Default Gauge Center Label **************/
       ['Volts', 0], // Default inside gauge label
-
     ]);  
     chart = new google.visualization.Gauge(document.getElementById('chart'));
   }
   
-  function getDeviceValue(){  
-    var url = getBaseUrl() + `/devices/${tileSettings.deviceId}`
-    var config = getAxiosConfig();
-	
-// Set up Units
-    var gaugeUnitsDisplay = tileSettings.gaugeUnits
+  function refresh(){
+    return getThing().then(function(thing){
+      //try to find the desired parameter
+      let attribute = thing.attributes.find(function(attr){ return attr.name === tileSettings.attribute});
+      //if we didn't get the attribute, bail out
+      if(attribute == null) return showError("Could not find desired attribute");
+      
+      //otherwise inject the attribute value as HTML
+      contentEl.innerHTML = attribute.currentValue //this approach just replaces the HTML which is more efficient, but can result in image flicker
+
+      initChart();  // Initalize chart again
+      
+// Piece together gauge elements and Draw   
+ 	if(chart && chartData){
+     chartData.setValue(0, 1, contentEl.innerHTML);  // Insert Data
+
+	// Set up Units
+    var gaugeUnitsDisplay = tileSettings.gaugeUnits;
     if(tileSettings.gaugeUnits == null || tileSettings.gaugeUnits == "")
-//********************** SET UP Default Units ********************
+//********************** SET UP Default Units ********************/
     {gaugeUnitsDisplay = "V";}  // Default unit if no entry
 
-// Set up number of decimals
-    var numDecimalsDisplay = tileSettings.numDecimals
+	// Set up number of decimals
+    var numDecimalsDisplay = tileSettings.numDecimals;
     if (tileSettings.numDecimals == "0") {numDecimalsDisplay = "#";}
     else if (tileSettings.numDecimals == "1") {numDecimalsDisplay = "#.#";}
-    else if (tileSettings.numDecimals == "3") {numDecimalsDisplay = "#.###";}
-    else {numDecimalsDisplay = "#.##";}  // Default if no entry
-    
-// Getting the device's attribute reading using Hubitat Maker API
-    var hubAttributeDisplay = tileSettings.hubAttribute
-    if(tileSettings.hubAttribute == null || tileSettings.hubAttribute == "")
-    {hubAttributeDisplay = "0";}  // Default 0 if no entry
-    
-    axios.get(url, config).then(function(res){
-        var value = res.data.attributes[hubAttributeDisplay].currentValue;
-        console.log(`Received battery reading: ${value}`);
-        //Set chart value and draw chart
-        if(chart && chartData){
-          chartData.setValue(0, 1, value);
-
-// Apply Units and Decimals
+    else if (tileSettings.numDecimals == "2") {numDecimalsDisplay = "#.##";}
+    else if (tileSettings.numDecimals == "3") {numDecimalsDisplay = "#.###";}  
+    else  {numDecimalsDisplay = "#.##";}  // Default unit if no entry    
+      
+	// Apply Units and Decimals
 		var formatter = new google.visualization.NumberFormat(
           {suffix: gaugeUnitsDisplay ,pattern:numDecimalsDisplay}  // Edit units and decimal places
-        
-		);
+        	);
         formatter.format(chartData,1);
 
-// Apply new gauge center label if entered in tile editor
+	// Apply new gauge center label if entered in tile editor
           if(tileSettings.gaugeLabel != null && tileSettings.gaugeLabel != ""){
             chartData.setValue(0, 0, tileSettings.gaugeLabel);
-          }
-          chart.draw(chartData, chartOptions);   
-        }
-      }).catch(function(error){
-          showError("Error communicating with Maker API")
-      });
+          	}
+   
+      chart.draw(chartData, chartOptions);   // Draw chart
+      }
+      
+    }).catch(function(error){
+      showError(error.message);
+    });
   }
-  
-  function valuePollingScheduler(){
-    getDeviceValue();
-    var refreshIntervCalc = tileSettings.refreshInterv
-    if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
-    	{refreshIntervCalc = 10;}  // Default 10 minuts unit if no entry
-    console.log("polling value in 5 minutes");
-    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
+
+  function getThing(){
+    let url = getBaseUrl() + `/devices/${tileSettings.deviceId}`
+    let config = getAxiosConfig();
+   
+    //make the API call
+    return axios.get(url, config).then(function(response){
+      //if we got a response with the expected base data
+      if(response.data && response.data.attributes){
+        //return the response
+        return response.data; //TODO: we could parse it into a more helpful "Thing" object format
+      }
+    }).catch(function(error){
+      showError("Error communicating with Maker API")
+    })
   }
 </script>
- 
