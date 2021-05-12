@@ -1,0 +1,287 @@
+<!-- kampto  ver. May09-2021, for SharpTools -->
+<!-- Do not edit below -->
+<script type="application/json" id="tile-settings">
+{
+  "schema": "0.1.0",
+  "settings": [
+    {"type": "STRING", "name": "apiSample", "label": "Sample Maker API URL"},
+    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
+    {"label": "Enter Attribute name", "name": "attribute", "type": "STRING"},
+    {
+      "type": "NUMBER",
+      "label": "Data Request Interval Minutes (default = 5)",
+      "name": "refreshInterv"
+    },
+    {
+      "label": "Chart Title (default = none)",
+      "type": "STRING",
+      "name": "chartTitle"
+    },
+    {
+      "name": "dataUnits",
+      "type": "STRING",
+      "label": "Data Units  (default = none)"
+    },
+    {
+      "label": "Disable Current Value Display? (check to remove)",
+      "name": "currentData",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "YaxisMin",
+      "label": "Y-Axis Min Value (default = 30)",
+      "type": "NUMBER"
+    },
+    {
+      "type": "NUMBER",
+      "label": "Y-Axis Max Value (default = 110)",
+      "name": "YaxisMax"
+    },
+    {
+      "type": "NUMBER",
+      "name": "XaxisSpan",
+      "label": "X-Axis Data Interval Span (default = 20)"
+    },
+    {
+      "name": "YaxisAutoScale",
+      "type": "BOOLEAN",
+      "label": "Disable Auto Scale Y-Axis? (check to disable)"
+    }
+  ],
+  "name": "Plot Generic",
+  "dimensions": {"width": 2, "height": 2}
+}
+</script>
+<!-- Do not edit above -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script src="//cdn.sharptools.io/js/custom-tiles.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<div id="chart_div"></div>
+
+<style>
+/******************** SET CHART SIZE WITHIN TILE ********************/
+  html,body {height: 100%; margin:0%; justify-content: center;}
+  #chart_div { height: 100%; width: 110%; } /*availble usable area inside tile not including tile label at top*/
+</style>
+
+<script>
+//Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
+var tileSettings = { 
+    // apiSample: "https://cloud.hubitat.com/api/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/apps/999/devices?access_token=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+    // deviceId: "185",
+    // attribute: "temperature"
+    }
+var apiSettings = {};
+var x = 0.0;
+var y = 0.0;
+var dataArray = new Array();
+var chartArray = new Array();
+var hubDataArray = new Array();
+var contentEl = document.getElementById("chart_div");
+maxDataCount = 0;
+google.charts.load('current', {packages: ['corechart', 'line']});
+
+ //when the tile is ready, get the settings from the callback
+  stio.ready(function(data){
+    tileSettings = data.settings; //apiSample, deviceId, attribute
+    init();  //and initialize the tile
+  });
+
+  function init(){
+    parseApiSample();  //parse the relevant settings out of the apiSample
+    defaultSettings();
+    valuePollingScheduler();
+    }
+
+/******************** DEFAULT TILE SETTINGS ********************/
+  function defaultSettings(){
+  if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
+    	{tileSettings.refreshInterv = 5;}  // Default 5 minutes if no entry
+  if(tileSettings.XaxisSpan == null || tileSettings.XaxisSpan == "")
+    	{tileSettings.XaxisSpan = 20;}  // Default unit if no entry
+  if(tileSettings.chartTitle == null || tileSettings.chartTitle == "")
+    	{tileSettings.chartTitle = "";}  // Default if no entry
+  if(tileSettings.dataUnits == null || tileSettings.dataUnits == "")
+    	{tileSettings.dataUnits = "";}  // Default if no entry
+  if (tileSettings.YaxisMin == null || tileSettings.YaxisMin == "")
+    	{tileSettings.YaxisMin = 30;}  // Default if no entry
+  if (tileSettings.YaxisMax == null || tileSettings.YaxisMax == "")
+  		{tileSettings.YaxisMax = 110;}  // Default if no entry
+  }
+/********************** REFRESH INTERVAL ************************/  
+  function valuePollingScheduler(){
+    dataArrayParse().then(function(){
+    var refreshIntervCalc = tileSettings.refreshInterv
+    console.log("polling value in minutes");
+    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
+  });
+  }
+
+  //helper method for logging an error to console, showing a toast, and updating the tile to display 'Error'
+  function showError(message){
+    console.error(message);
+    stio.showToast(message, "red");
+    contentEl.innerText = "Error";
+  }
+
+  //parse out the various components from a provided Maker API URL
+  function parseApiSample(sampleUrl){
+    //if we weren't passed in an explicit URL to parse
+    if(sampleUrl == null){
+      //then try to use the sample API URL from the tile settings
+      sampleUrl = tileSettings.apiSample;
+    }
+    //if no URL was provided, let the user know
+    if(sampleUrl == null || sampleUrl === "") showError("No API URL was provided. Please configure the tile.");
+    //if the api isn't the cloud API, let the user know
+    if(sampleUrl.indexOf("cloud.hubitat.com") < 0) showError("Please use the Hubitat Maker API CLOUD URI.")
+
+    //try to parse out the various parts of the URL we need with a regular expression
+    var re = /https:\/\/cloud\.hubitat\.com\/api\/([^\/]+)\/apps\/([\d]+)\/[^\?]+\?access_token\=([^\&]+)/;
+    var match = sampleUrl.match(re); //array of the various regex matches (0: full string, 1: hub id, 2: app id, 3: token)
+
+    //pass the parsed settings back into the top-level variable
+    apiSettings = { 
+      "hubId": match[1], 
+      "appId": match[2], 
+      "token": match[3]
+    };
+  }
+  //helper function to format the parsed data back into a base URI
+  function getBaseUrl(){
+    return `https://cloud.hubitat.com/api/${apiSettings.hubId}/apps/${apiSettings.appId}`
+  }
+  //helper function to format the token into an axios 'data' object to attach the token as a parameter
+  function getAxiosConfig(){
+    return {params: {access_token: apiSettings.token}};
+  }
+
+/******************** BUILD CHART DATA ARRAY ********************/ 
+function dataArrayParse() {
+  return getThing().then(function(thing){      //try to find the desired parameter
+      let attribute = thing.attributes.find(function(attr){ return attr.name === tileSettings.attribute});
+      //if we didn't get the attribute, bail out
+      if(attribute == null) return showError("Could not find desired attribute");
+      //otherwise inject the attribute value as HTML
+      contentEl.innerHTML = attribute.currentValue //this approach just replaces the HTML which is more efficient, but can result in image flicker
+ // Put Data into chart array 
+  x = x + 1.0; // Incriment Data interval count
+  y = parseFloat(contentEl.innerHTML); // Incoming data
+  maxDataCount = x;
+  dataArray.push(x); // Add new element to array
+  hubDataArray.push(y);
+  
+    chartArray[0] = ['X', 'Y']; 
+        for (i = 0; i < maxDataCount; i++) {
+          chartArray[i + 1] = [dataArray[i], hubDataArray[i]];
+           }  
+  // Remove array element if its x position already past off chart to reduce array size  
+  if (x-1 > tileSettings.XaxisSpan) {
+    chartArray.splice(1, 1); 
+  }  
+  google.charts.setOnLoadCallback(drawChart); // After data, draw chart
+    }).catch(function(error){
+      showError(error.message);
+    });  
+  }
+/******************** SET CHART DATA AND DRAW ********************/ 
+function drawChart(){
+ var data = google.visualization.arrayToDataTable(chartArray, false); 
+ //'false' means that the first row contains labels, not data.
+  data.addColumn('number', 'X');  // Add a series
+  data.addColumn('number', 'Y');  // Y axis
+
+  var chartTitleDisplay;
+  if (tileSettings.currentData == false) {chartTitleDisplay = tileSettings.chartTitle + "      " + y + tileSettings.dataUnits; }
+  //if (tileSettings.currentData == false) {chartTitleDisplay = tileSettings.chartTitle + "      " + tileSettings.refreshInterv + tileSettings.dataUnits; }
+  else {chartTitleDisplay = tileSettings.chartTitle + tileSettings.dataUnits;}
+
+// Build X-Axis ticks and grid
+  var XaxisTick0;
+  var XaxisTick2;
+  
+  // Auto Scale X-Axis
+  if (x > tileSettings.XaxisSpan) {XaxisTick0 = 0 + (x - tileSettings.XaxisSpan);}
+  	else XaxisTick0 = 0;
+  if (x > tileSettings.XaxisSpan) {XaxisTick2 = x;}
+  	else XaxisTick2 = tileSettings.XaxisSpan;  
+  var XaxisTick1 = (XaxisTick2 - XaxisTick0)/2 + XaxisTick0;
+  
+// Build Y-Axis ticks and grid
+  var YaxisTick0 = tileSettings.YaxisMin;
+  var YaxisTick4 = tileSettings.YaxisMax;
+  var YaxisRange = tileSettings.YaxisMax - tileSettings.YaxisMin;
+  
+  // Auto Y-Axis Scale +/- 2% or not
+  if (tileSettings.YaxisAutoScale == false) {
+    if (y < tileSettings.YaxisMin) 
+  	{YaxisTick0 = y * 0.98; YaxisTick4 = YaxisTick0 + YaxisRange;}
+    if (y > tileSettings.YaxisMax) 
+  	{YaxisTick4 = y * 1.02; YaxisTick0 = YaxisTick4 - YaxisRange;}  
+  }
+  // Calculate Y-Axs Tick locations		
+  //var YaxisTick1 = (YaxisTick4 - YaxisTick0)/4 + YaxisTick0;
+  //var YaxisTick2 = (YaxisTick4 - YaxisTick0)/4 + YaxisTick1;
+  //var YaxisTick3 = (YaxisTick4 - YaxisTick0)/4 + YaxisTick2;
+    
+/******************** SET CHART AREA PARAMETERS ********************/ 
+  var options = {
+    chartArea: {top: 40,  width: '70%', height: '65%'}, // Chart deadspace and vert padding
+    //theme: 'maximized',  // puts all axis & titles inside chart
+    //titlePosition: 'in', // Move title in chart
+    //axisTitlesPosition: 'in',
+    //curveType: 'function', // 'function' for curves, or 'none'
+    title: chartTitleDisplay,
+    titleTextStyle: {fontSize: 15, bold: true, color: '#FFFFFF'},
+    legend: 'none',
+    series: {
+            0: {lineWidth: 4, color: '#FFFF00' }
+           },
+    backgroundColor: 'transparent',  //backgroundColor: '#f1f8e9'
+    hAxis: {
+      //title: 'Data Points',
+      textStyle:{fontSize: 10, bold: false, italic: false, color: '#FFFFFF'},
+      baselineColor: '#FFFFFF',
+      gridlineColor: '#FFFFFF',
+      //gridlines: {count: 1},
+      //minorGridlines: {count: 0}, 
+      format:'#',  // Remove decimals if any
+      viewWindow: {min: XaxisTick0, max: XaxisTick2},
+      ticks: [XaxisTick0, XaxisTick1, XaxisTick2] // Axis grid and display labels
+    	},
+    vAxis: {
+      //title: 'Temp',
+      textStyle:{fontSize: 10, bold: false, italic: false, color: '#FFFFFF'},
+      gridlineColor: '#FFFFFF',   //'#FFFFFF',   'transparent'
+      baselineColor: '#FFFFFF',
+      gridlines: {count: 4},
+      minorGridlines: {count: 0}, 
+      format:'#',  // Remove decimals if any
+      //viewWindowMode: 'pretty', // Scale to keep points inside
+      viewWindow: {min: YaxisTick0, max: YaxisTick4},
+      //ticks: [YaxisTick0, YaxisTick1, YaxisTick2, YaxisTick3, YaxisTick4] // Axis grid and display labels
+       },
+    };
+
+  var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+  chart.draw(data, options);
+  }
+
+/******************** SNAG ATTRIBUTE FROM HUB ********************/ 
+function getThing(){
+    let url = getBaseUrl() + `/devices/${tileSettings.deviceId}`
+    let config = getAxiosConfig();
+   
+    //make the API call
+    return axios.get(url, config).then(function(response){
+      //if we got a response with the expected base data
+      if(response.data && response.data.attributes){
+        //return the response
+        return response.data; //TODO: we could parse it into a more helpful "Thing" object format
+      }
+    }).catch(function(error){
+      showError("Error communicating with Maker API")
+    })
+  }  
+</script>
