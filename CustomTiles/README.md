@@ -30,7 +30,7 @@ NOTES:.................
 
 	TANK LEVEL: You might need to chnage the width, height, and padding in the code to center the gauge in the tile. If you get no value or the wrong value chnage the attribute number in the tile editor.
 	
-	PLOT: The data from the plot is stored in the browser, so if you refresh browser it it restart. 
+	PLOT: The data from the plot is stored in the browser, so if you refresh browser it will restart from zero. 
 
 
 ATTRIBUTE NAMES:  Open the Hubitat Device to see what attributes are availible.
@@ -40,4 +40,5 @@ ATTRIBUTE NAMES:  Open the Hubitat Device to see what attributes are availible.
 MANDATORY DASHBOARD TILE EDITOR OPTIONS: you must fill these 3 out at the very least
 
 ![image](https://user-images.githubusercontent.com/31904505/117595076-8ed89700-b0f4-11eb-850d-89cdada15593.png)
+
 
