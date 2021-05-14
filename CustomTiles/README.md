@@ -7,7 +7,7 @@ PROCEDURE to load this HTML Custom Tile:................
 	
 	Select HTML, not URL
 	
-	Copy and Past all the HTML code from here to the sharptool HTML editor
+	Copy and Paste all the HTML code from here to the sharptool HTML editor
 	
 	If Resolve box pops up hit resolve to all the radio buttons on right side, hit resolve
 	
@@ -19,8 +19,10 @@ PROCEDURE to load this HTML Custom Tile:................
 	
 	Add new custom tile to dashboard and set up per SharpTools link above in post #1
 	
-	In dashboard Tile Editor enter the attribute name; temperature, voltage, humidity, etc.. Or what ever the Hubiat DH has to offer.
-
+	In dashboard Tile Editor enter the API Url, DeviceID and Attribute name; temperature, voltage, humidity, etc.. Or what ever the Hubiat DH has to offer.
+	
+	Change other Tile editor settings as needed or use the defaults
+	
 NOTES:.................
 
 	-Zero values at the end of a number wont show up. So if you change the deciamls and nothing happens then the last values are likely zeros
@@ -28,7 +30,7 @@ NOTES:.................
 
 	GAUGES: You can easly change the gauge max/min value and color band positions by looking in the HTML code and modifying it. Its labbeled in th HTML
 
-	TANK LEVEL: You might need to chnage the width, height, and padding in the code to center the gauge in the tile. If you get no value or the wrong value chnage the attribute number in the tile editor.
+	TANK LEVEL: You might need to chnage the width, height, and padding in the HTML code to center the gauge in the tile. 
 	
 	PLOT: The data from the plot is stored in the browser, so if you refresh browser it will restart from zero. 
 
