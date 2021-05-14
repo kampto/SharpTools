@@ -174,9 +174,7 @@ function dataArrayParse() {
 /******************** SET CHART DATA AND DRAW ********************/ 
 function drawChart(){
  var data = google.visualization.arrayToDataTable(chartArray, false); //'false' means that the first row contains labels, not data.
-  data.addColumn('number', 'X');  // Add a series
-  data.addColumn('number', 'Y');  // Y axis
-
+  
 // Build X-Axis ticks and grid
   var XaxisTick0;
   var XaxisTick2;
