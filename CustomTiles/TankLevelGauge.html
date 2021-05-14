@@ -4,17 +4,13 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
+    {"type": "STRING", "name": "apiSample", "label": "Sample Maker API URL"},
     {"type": "STRING", "name": "deviceId", "label": "Device ID"},
+    {"label": "Enter Attribute name", "name": "attribute", "type": "STRING"},
     {
-      "name": "refreshInterv",
       "type": "NUMBER",
-      "label": "Refresh Interval Minutes (default = 10)"
-    },
-    {
-      "name": "hubAttribute",
-      "label": "If multiple attributes select another,  0 to 9 (default = 0)",
-      "type": "NUMBER"
+      "label": "Data Request Interval Minutes (default = 5)",
+      "name": "refreshInterv"
     }
   ],
   "name": "Tank Level",
@@ -35,7 +31,7 @@
 <script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-exports.min.js?hcode=a0c21fc77e1449cc86299c5faa067dc4"></script>
 <script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-ui.min.js?hcode=a0c21fc77e1449cc86299c5faa067dc4"></script>
 <div id="ac_style_samples-bct-pointers-and-data-tank-16" style="display:none;">
-  
+
 html, body, #container {
     width: 27%;  
     height: 32%; 
@@ -44,7 +40,7 @@ html, body, #container {
   	padding-top: 4px;
     }  
 </div>
-   
+ 
 <script>(function(){
 function ac_add_to_head(el){
 	var head = document.getElementsByTagName('head')[0];
@@ -65,44 +61,37 @@ ac_add_link('https://cdn.anychart.com/releases/8.9.0/css/anychart-ui.min.css?hco
 ac_add_style(document.getElementById("ac_style_samples-bct-pointers-and-data-tank-16").innerHTML);
 ac_add_style(".anychart-embed-samples-bct-pointers-and-data-tank-16{width:600px;height:450px;}");
 })();</script>
-<div id="container"></div>
-<script>
+<div id="container"></div> 
   
-//*************** SharpTool Data Parse ******************* 
+<script>
+/******************** SharpTool Data Parse *******************/ 
 //Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
   var tileSettings = { 
     // apiSample: "https://cloud.hubitat.com/api/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/apps/999/devices?access_token=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
     // deviceId: "185",
     }
   var apiSettings = {};
-
-stio.ready(function(data){
-    //get the settings from the callback
-    tileSettings = data.settings; //apiSample, deviceId, label
-    //and initialize the tile
-    init();
+  var contentEl = document.getElementById("container");	
+  
+//when the tile is ready, get the settings from the callback
+  stio.ready(function(data){
+    tileSettings = data.settings; //apiSample, deviceId, attribute
+    init();  //and initialize the tile
   });
 
   function init(){
-    //parse the relevant settings out of the apiSample
-    parseApiSample();
-
-    if(tileSettings.deviceId == null || tileSettings.deviceId == ""){
-      return showError("Device ID is not set");
-    } 
-
-//Call data from Hubitat Maker API then time out till next call
+    parseApiSample();  //parse the relevant settings out of the apiSample
+    defaultSettings();
     valuePollingScheduler();
-  }
+    }
 
-  //helper method for logging an error to console, showing a toast, and updating the tile to display 'Error'
-  function showError(message){
-    console.error(message);
-    stio.showToast(message, "red");
-    document.getElementById("chart").innerHTML = "Error";
-  }
+/******************** DEFAULT TILE SETTINGS ********************/
+  function defaultSettings(){
+  if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
+    	{tileSettings.refreshInterv = 5;}  // Default if no entry
+   }
 
-  //parse out the various components from a provided Maker API URL
+//parse out the various components from a provided Maker API URL
   function parseApiSample(sampleUrl){
     //if we weren't passed in an explicit URL to parse
     if(sampleUrl == null){
@@ -125,7 +114,6 @@ stio.ready(function(data){
       "token": match[3]
     };
   }
-
   //helper function to format the parsed data back into a base URI
   function getBaseUrl(){
     return `https://cloud.hubitat.com/api/${apiSettings.hubId}/apps/${apiSettings.appId}`
@@ -135,22 +123,17 @@ stio.ready(function(data){
     return {params: {access_token: apiSettings.token}};
   }
 
-  function getDeviceValue(){  
-    var url = getBaseUrl() + `/devices/${tileSettings.deviceId}`
-    var config = getAxiosConfig();
-	
-// Getting the device's attribute reading using Hubitat Maker API
-    var hubAttributeDisplay = tileSettings.hubAttribute;
-    if(tileSettings.hubAttribute == null || tileSettings.hubAttribute == "")
-    {hubAttributeDisplay = "0";}  // Default 0 if no entry
+/********************** BUILD CHART DATA  ***********************/ 
+function dataArrayParse() {
+  return getThing().then(function(thing){      //try to find the desired parameter
+      let attribute = thing.attributes.find(function(attr){ return attr.name === tileSettings.attribute});
+      //if we didn't get the attribute, bail out
+      if(attribute == null) return showError("Could not find desired attribute");
+    var value = attribute.currentValue;    
+    contentEl.innerHTML = "";  // Change "" to attribute.currentValue to add value to chart top 
     
-    axios.get(url, config).then(function(res){
-        var value = res.data.attributes[hubAttributeDisplay].currentValue;
-        //var value = res.data.attributes["0"].currentValue;
-        console.log(`Received reading: ${value}`);
-
-//*************** anyCharts Gauge Set-up ******************* 
-anychart.onDocumentReady(function () {
+/******************* anyCharts Gauge Set-up ********************/ 
+  anychart.onDocumentReady(function () {
   
   // Parse Data into chart
   var dataSet = anychart.data.set([value]);
@@ -209,23 +192,41 @@ anychart.onDocumentReady(function () {
   // draw the chart
   gauge.container("container");
   gauge.draw();
-
-});
-
-     }).catch(function(error){
-          showError("Error communicating with Maker API")
-      });
+	});
+  }).catch(function(error){showError(error.message);});  
+}    
+   
+/******************** SNAG ATTRIBUTE FROM HUB ********************/ 
+function getThing(){
+    let url = getBaseUrl() + `/devices/${tileSettings.deviceId}`
+    let config = getAxiosConfig();
+   
+    //make the API call
+    return axios.get(url, config).then(function(response){
+      //if we got a response with the expected base data
+      if(response.data && response.data.attributes){
+        //return the response
+        return response.data; //TODO: we could parse it into a more helpful "Thing" object format
+      }
+    }).catch(function(error){
+      showError("Error communicating with Maker API")
+    })
+  }  
+/********************** REFRESH INTERVAL ************************/  
+  function valuePollingScheduler(){
+    dataArrayParse().then(function(){
+    var refreshIntervCalc = tileSettings.refreshInterv
+    console.log("polling value in XX minutes");
+    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
+  });
   }
 
-// Refresh poll
-function valuePollingScheduler(){
-    getDeviceValue();
-    var refreshIntervCalc = tileSettings.refreshInterv
-    if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
-    	{refreshIntervCalc = 10;}  // Default 10 minuts unit if no entry
-    console.log("polling value in 5 minutes");
-    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
+//helper method for logging an error to console, showing a toast, and updating the tile to display 'Error'
+  function showError(message){
+    console.error(message);
+    stio.showToast(message, "red");
+    contentEl.innerText = "Error";
   }
  
 </script>
-</div> 
+ 
