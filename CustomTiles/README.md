@@ -25,14 +25,16 @@ PROCEDURE to load this HTML Custom Tile:................
 	
 NOTES:.................
 
+	-For some reason sometimes the "check box" boolean tile settings in the tile editor dont take until you click and unclick or vs versa.
 	-Zero values at the end of a number wont show up. So if you change the deciamls and nothing happens then the last values are likely zeros
 	-Depending on you screen resolution and dashboard tile size, it may be nessasary to edit the dimenions of content in the HTML editor. Sometime in multiple places.
+	
 
 	GAUGES: You can easly change the gauge max/min value and color band positions by looking in the HTML code and modifying it. Its labbeled in th HTML
 
 	TANK LEVEL: You might need to chnage the width, height, and padding in the HTML code to center the gauge in the tile. 
 	
-	PLOT: The data from the plot is stored in the browser, so if you refresh browser it will restart from zero. 
+	PLOT: The data from the plot is stored in the browser, so if you refresh browser it will restart from zero. Cycle the check boxes in tile editor for them to take.
 
 
 ATTRIBUTE NAMES:  Open the Hubitat Device to see what attributes are availible.
