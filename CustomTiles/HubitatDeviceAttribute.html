@@ -1,0 +1,178 @@
+<!-- kampto  ver. May09-2021, for SharpTools -->
+<!-- Do not edit below -->
+<script type="application/json" id="tile-settings">
+{
+  "schema": "0.1.0",
+  "settings": [
+    {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
+    {"name": "deviceId", "type": "STRING", "label": "Device ID"},
+    {"type": "STRING", "name": "attribute", "label": "Enter Attribute name"},
+    {
+      "name": "refreshInterv",
+      "label": "Data Request Interval Minutes (default = 10)",
+      "type": "NUMBER"
+    },
+    {
+      "label": "Data Units  (default = none)",
+      "type": "STRING",
+      "name": "dataUnits"
+    },
+    {
+      "type": "NUMBER",
+      "name": "numDecimals",
+      "label": "How many decimal places?  (default = 1)"
+    },
+    {
+      "name": "fontSize",
+      "label": "Font Size,   (default = 150)",
+      "type": "NUMBER"
+    }
+  ],
+  "name": "Hubitat Device Attribute"
+}
+</script>
+<!-- Do not edit above -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script src="//cdn.sharptools.io/js/custom-tiles.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<div class="main-content">
+  <span id="content"><span data-index="0">Loading...</span></span>
+</div>
+  
+/************************ SET CONTENT FORMAT **************************/
+<style>
+  html,body {height: 100%;margin:0;}
+  .main-content {
+    display: flex;
+    height:100%;
+    align-items: center;
+    justify-content: center;
+  }
+  /*:root {--fontSize: tileFontSize; } /* Put variable into <style> */
+  .main-content #content {
+    font-size: 80%;  /* Change Font Size */
+    text-align: center; /* OPTIONAL center align any text that gets injected */
+  }
+  .main-content #content img {
+    max-width: 80%; /* OPTIONAL scale any inner images if they're too big */
+  }
+</style>
+
+<script>
+//Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
+var tileSettings = { 
+  	// apiSample: "https://cloud.hubitat.com/api/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/apps/999/devices?access_token=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+    // deviceId: "185",
+    // attribute: "temperature"
+    }
+var apiSettings = {};
+var contentEl = document.getElementById("content");
+
+ //when the tile is ready, get the settings from the callback
+  stio.ready(function(data){
+    tileSettings = data.settings; //apiSample, deviceId, attribute
+    init();  //and initialize the tile
+  });
+
+  function init(){
+    parseApiSample();  //parse the relevant settings out of the apiSample
+    defaultSettings();
+    valuePollingScheduler();
+    }
+
+/******************** DEFAULT TILE SETTINGS ********************/
+  function defaultSettings(){
+  if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
+    	{tileSettings.refreshInterv = 10;}  // Default if no entry
+  if(tileSettings.dataUnits == null || tileSettings.dataUnits == "")
+    	{tileSettings.dataUnits = "";}  
+  if(tileSettings.numDecimals == null || tileSettings.numDecimals == "")
+    	{tileSettings.numDecimals = 1;}  // Default if no entry
+  if(tileSettings.fontSize == null || tileSettings.fontSize == "")
+    	{tileSettings.fontSize = 150;}  // Default if no entry
+    var tileFontSize = tileSettings.fontSize + '%';
+		document.documentElement.style
+    	.setProperty('font-size', tileFontSize, 'important');  // Pass value into style variable
+   }
+
+  //parse out the various components from a provided Maker API URL
+  function parseApiSample(sampleUrl){
+    //if we weren't passed in an explicit URL to parse
+    if(sampleUrl == null){
+      //then try to use the sample API URL from the tile settings
+      sampleUrl = tileSettings.apiSample;
+    }
+    //if no URL was provided, let the user know
+    if(sampleUrl == null || sampleUrl === "") showError("No API URL was provided. Please configure the tile.");
+    //if the api isn't the cloud API, let the user know
+    if(sampleUrl.indexOf("cloud.hubitat.com") < 0) showError("Please use the Hubitat Maker API CLOUD URI.")
+
+    //try to parse out the various parts of the URL we need with a regular expression
+    var re = /https:\/\/cloud\.hubitat\.com\/api\/([^\/]+)\/apps\/([\d]+)\/[^\?]+\?access_token\=([^\&]+)/;
+    var match = sampleUrl.match(re); //array of the various regex matches (0: full string, 1: hub id, 2: app id, 3: token)
+
+    //pass the parsed settings back into the top-level variable
+    apiSettings = { 
+      "hubId": match[1], 
+      "appId": match[2], 
+      "token": match[3]
+    };
+  }
+  //helper function to format the parsed data back into a base URI
+  function getBaseUrl(){
+    return `https://cloud.hubitat.com/api/${apiSettings.hubId}/apps/${apiSettings.appId}`
+  }
+  //helper function to format the token into an axios 'data' object to attach the token as a parameter
+  function getAxiosConfig(){
+    return {params: {access_token: apiSettings.token}};
+  }
+  
+/************************ BUILD CONTENT DATA *************************/ 
+function dataArrayParse() {
+  return getThing().then(function(thing){      //try to find the desired parameter
+      let attribute = thing.attributes.find(function(attr){ return attr.name === tileSettings.attribute});
+      //if we didn't get the attribute, bail out
+      if(attribute == null) return showError("Could not find desired attribute");
+      //otherwise inject the attribute value as HTML
+    var newData = attribute.currentValue;
+    if (typeof (newData) === 'number') {
+    	var newData = newData.toFixed(tileSettings.numDecimals);
+  		}   // Adjust decimal places if its a number
+     contentEl.innerHTML = newData + tileSettings.dataUnits;  // Add units if any
+    }).catch(function(error){showError(error.message);});  
+  }
+
+/*********************** SNAG ATTRIBUTE FROM HUB ********************/ 
+function getThing(){
+    let url = getBaseUrl() + `/devices/${tileSettings.deviceId}`
+    let config = getAxiosConfig();
+   
+    //make the API call
+    return axios.get(url, config).then(function(response){
+      //if we got a response with the expected base data
+      if(response.data && response.data.attributes){
+        //return the response
+        return response.data; //TODO: we could parse it into a more helpful "Thing" object format
+      }
+    }).catch(function(error){
+      showError("Error communicating with Maker API")
+    })
+  }  
+
+/********************** REFRESH INTERVAL ************************/  
+  function valuePollingScheduler(){
+    dataArrayParse().then(function(){
+    var refreshIntervCalc = tileSettings.refreshInterv
+    console.log("polling value in minutes");
+    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
+  });
+  }
+
+//helper method for logging an error to console, showing a toast, and updating the tile to display 'Error'
+  function showError(message){
+    console.error(message);
+    stio.showToast(message, "red");
+    contentEl.innerText = "Error";
+  }
+  
+</script>
