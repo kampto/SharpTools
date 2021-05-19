@@ -48,7 +48,11 @@ MANDATORY DASHBOARD TILE EDITOR OPTIONS: you must fill these 3 out at the very l
 ![image](https://user-images.githubusercontent.com/31904505/117595076-8ed89700-b0f4-11eb-850d-89cdada15593.png)
 
 GAUGE EXAMPLES:
+
 ![image](https://user-images.githubusercontent.com/31904505/118742984-4f9dfa80-b806-11eb-9292-bbdaef3b0e01.png)
 
 PLOT EXAMPLES:
+
+![image](https://user-images.githubusercontent.com/31904505/118754204-66028100-b81b-11eb-98ec-8ee0d4b7bab2.png)
+
 
