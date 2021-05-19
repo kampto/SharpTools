@@ -35,6 +35,8 @@ NOTES:.................
 	TANK LEVEL: You might need to chnage the width, height, and padding in the HTML code to center the gauge in the tile. 
 	
 	PLOT: The data from the plot is stored in the browser, so if you refresh browser it will restart from zero. Cycle the check boxes in tile editor for them to take.
+	
+	HUBITAT DEVICE ATTRIBUTE: A way to grab data from a device (temperature, contact, switch, etc..) and make a tile to display it with font, units, and decimal options.
 
 
 ATTRIBUTE NAMES:  Open the Hubitat Device to see what attributes are availible.
@@ -45,4 +47,8 @@ MANDATORY DASHBOARD TILE EDITOR OPTIONS: you must fill these 3 out at the very l
 
 ![image](https://user-images.githubusercontent.com/31904505/117595076-8ed89700-b0f4-11eb-850d-89cdada15593.png)
 
+GAUGE EXAMPLES:
+![image](https://user-images.githubusercontent.com/31904505/118742984-4f9dfa80-b806-11eb-9292-bbdaef3b0e01.png)
+
+PLOT EXAMPLES:
 
