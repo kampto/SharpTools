@@ -4,23 +4,23 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"type": "STRING", "name": "apiSample", "label": "Sample Maker API URL"},
-    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
-    {"label": "Enter Attribute name", "name": "attribute", "type": "STRING"},
+    {"name": "apiSample", "label": "Sample Maker API URL", "type": "STRING"},
+    {"type": "STRING", "label": "Device ID", "name": "deviceId"},
+    {"type": "STRING", "name": "attribute", "label": "Enter Attribute name"},
     {
       "type": "NUMBER",
       "label": "Data Request Interval Minutes (default = 5)",
       "name": "refreshInterv"
     },
     {
+      "name": "chartTitle",
       "label": "Chart Title (default = none)",
-      "type": "STRING",
-      "name": "chartTitle"
+      "type": "STRING"
     },
     {
       "name": "dataUnits",
-      "type": "STRING",
-      "label": "Data Units  (default = none)"
+      "label": "Data Units  (default = none)",
+      "type": "STRING"
     },
     {
       "label": "Disable Current Value Display? (check to remove)",
@@ -29,26 +29,32 @@
     },
     {
       "name": "YaxisMin",
-      "label": "Y-Axis Min Value (default = 30)",
+      "type": "NUMBER",
+      "label": "Y-Axis Min Value (default = 30)"
+    },
+    {
+      "name": "YaxisMax",
+      "label": "Y-Axis Max Value (default = 110)",
       "type": "NUMBER"
     },
     {
+      "label": "X-Axis Data Interval Span (default = 20)",
       "type": "NUMBER",
-      "label": "Y-Axis Max Value (default = 110)",
-      "name": "YaxisMax"
+      "name": "XaxisSpan"
     },
     {
-      "type": "NUMBER",
-      "name": "XaxisSpan",
-      "label": "X-Axis Data Interval Span (default = 20)"
-    },
-    {
+      "label": "Disable Auto Scale Y-Axis? (check to disable)",
       "name": "YaxisAutoScale",
-      "type": "BOOLEAN",
-      "label": "Disable Auto Scale Y-Axis? (check to disable)"
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "scaleIncrease",
+      "label": "Allow Y-Axis Scale Range to Increase?  (default = disabled)",
+      "type": "BOOLEAN"
     }
   ],
-  "name": "Plot Advanced"
+  "name": "Plot Generic",
+  "dimensions": {"height": 2, "width": 2}
 }
 </script>
 <!-- Do not edit above -->
@@ -158,7 +164,7 @@ function dataArrayParse() {
   dataArray.push(x); // Add new element to array
   hubDataArray.push(y);
   
-    chartArray[0] = ['X', 'Y']; 
+    chartArray[0] = ['X', 'Y']; // column titles
         for (i = 0; i < maxDataCount; i++) {
           chartArray[i + 1] = [dataArray[i], hubDataArray[i]];
            }  
@@ -174,7 +180,7 @@ function dataArrayParse() {
 /******************** SET CHART DATA AND DRAW ********************/ 
 function drawChart(){
  var data = google.visualization.arrayToDataTable(chartArray, false); //'false' means that the first row contains labels, not data.
-  
+ 
 // Build X-Axis ticks and grid
   var XaxisTick0;
   var XaxisTick2;
@@ -193,8 +199,13 @@ function drawChart(){
       
   // Auto Y-Axis Scale +/- 2% or not
   if (tileSettings.YaxisAutoScale == false) {
-  	if (y <  YaxisTick0) {YaxisTick0 = parseInt(y * 0.98); YaxisTick4 = YaxisTick0 + YaxisRange;}
-    if (y >  YaxisTick4) {YaxisTick4 = parseInt(y * 1.02); YaxisTick0 = YaxisTick4 - YaxisRange;}
+	 if (tileSettings.scaleIncrease == true) {
+  		if (y <  YaxisTick0) {YaxisTick0 = parseInt(y * 0.98);}
+    	if (y >  YaxisTick4) {YaxisTick4 = parseInt(y * 1.02);}
+   		}
+    // Keep Scale Range but adjust window  
+	else if (y <  YaxisTick0) {YaxisTick0 = parseInt(y * 0.98); YaxisTick4 = YaxisTick0 + YaxisRange;}
+    else if (y >  YaxisTick4) {YaxisTick4 = parseInt(y * 1.02); YaxisTick0 = YaxisTick4 - YaxisRange;}
    }
   // Calculate Y-Axs Tick locations		
   //var YaxisTick1 = (YaxisTick4 - YaxisTick0)/4 + YaxisTick0;
@@ -209,13 +220,13 @@ function drawChart(){
    
 /******************** SET CHART AREA PARAMETERS ********************/ 
   var options = {
-    chartArea: {top: 40,  width: '70%', height: '65%'}, // Chart deadspace and vert padding
+    chartArea: {top: 37,  width: '72%', height: '67%'}, // Chart deadspace and vert padding
     //theme: 'maximized',  // puts all axis & titles inside chart
     //titlePosition: 'in', // Move title in chart
     //axisTitlesPosition: 'in',
     curveType: 'function', // 'function' for curves
     title: chartTitleDisplay,
-    titleTextStyle: {fontSize: 15, bold: true, color: '#FFFFFF'},
+    titleTextStyle: {fontSize: 14, bold: true, color: '#FFFFFF'},
     legend: 'none',
     series: {
             0: {lineWidth: 4, color: '#FFFF00' }
