@@ -1,0 +1,111 @@
+<!-- kampto  ver. June03-2021, for SharpTools -->
+<!-- Do not edit below -->
+<script type="application/json" id="tile-settings">
+{
+  "schema": "0.1.0",
+  "settings": [
+    {
+      "type": "STRING",
+      "label": "Target Date, Use this Format:  Jan 1, 2022 15:00:00",
+      "name": "targetDate"
+    },
+    {
+      "label": "Font Size  (default = 130)",
+      "type": "NUMBER",
+      "name": "fontSize"
+    },
+    {
+      "name": "daysOnly",
+      "label": "Show Days Only?    (default = No)",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "showSeconds",
+      "type": "BOOLEAN",
+      "label": "Show Seconds?   (default = No)"
+    }
+  ],
+  "name": "Count Down Timer"
+}
+</script>
+<!-- Do not edit above -->
+<script src="//cdn.sharptools.io/js/custom-tiles.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<div class="main-content">
+  <span id="content"><span data-index="0">Loading...</span></span>
+</div>
+  
+<!--************************ SET CONTENT FORMAT **************************-->
+<style>
+  html,body {height: 100%; margin:0;}
+  .main-content {
+    display: flex;
+    height:100%;
+    align-items: center;
+    justify-content: center;
+    //background-color: #FFFFFF;
+  }
+  .main-content #content {
+    font-size: 80%;  /* Change Font Size */
+    text-align: center; /* OPTIONAL center align any text that gets injected */
+  }
+</style>
+
+<script>
+var contentEl = document.getElementById("content");
+var refresh = 1000; // starting refresh interval   
+
+ //when the tile is ready, get the settings from the callback
+  stio.ready(function(data){
+    tileSettings = data.settings; //Tile editor settings
+    defaultSettings();  //and initialize the tile
+  });
+
+/******************** DEFAULT TILE SETTINGS ********************/
+ function defaultSettings(){
+    if(tileSettings.daysOnly == null || tileSettings.daysOnly == "")
+    	{tileSettings.daysOnly = false;} 
+    if(tileSettings.showSeconds == null || tileSettings.showSeconds == "")
+    	{tileSettings.showSeconds = false;} 
+	if(tileSettings.fontSize == null || tileSettings.fontSize == "")
+    	{tileSettings.fontSize = 130;}  // Default if no entry
+    var tileFontSize = tileSettings.fontSize + '%';
+		document.documentElement.style
+    	.setProperty('font-size', tileFontSize, 'important');  // Pass value into style variable
+   }  
+
+var x = setInterval(function() {
+  var countDownDate = new Date(tileSettings.targetDate).getTime();
+  var now = new Date().getTime(); // Get today's date and time
+  // Find the distance between now and the count down date
+  var distance = countDownDate - now;
+
+  // Time calculations for days, hours, minutes and seconds
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  // Display the result in the element with id="content"
+  if (tileSettings.daysOnly == true) {
+  	refresh = 60000;  
+    document.getElementById("content").innerHTML = days + " Days";
+   	}
+  else if (tileSettings.showSeconds == false){
+   	refresh = 60000;  
+   	document.getElementById("content").innerHTML = days + " Days <br>" + hours + "h "
+  	+ minutes + "m "; 
+   	}	
+  else {
+  	refresh = 1000;  
+    document.getElementById("content").innerHTML = days + " Days <br>"  + hours + "h "
+  	+ minutes + "m " + seconds + "s ";
+   	}
+  
+  // If the count down is finished, write some text
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById("content").innerHTML = "EXPIRED";
+  }
+}, refresh);
+</script>
