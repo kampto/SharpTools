@@ -4,43 +4,43 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "label": "Sample Maker API URL", "type": "STRING"},
-    {"type": "STRING", "label": "Device ID", "name": "deviceId"},
-    {"type": "STRING", "name": "attribute", "label": "Enter Attribute name"},
+    {"label": "Sample Maker API URL", "name": "apiSample", "type": "STRING"},
+    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
+    {"name": "attribute", "label": "Enter Attribute name", "type": "STRING"},
     {
-      "type": "NUMBER",
       "label": "Data Request Interval Minutes (default = 5)",
+      "type": "NUMBER",
       "name": "refreshInterv"
     },
     {
-      "name": "chartTitle",
       "label": "Chart Title (default = none)",
+      "name": "chartTitle",
       "type": "STRING"
     },
     {
       "name": "dataUnits",
-      "label": "Data Units  (default = none)",
-      "type": "STRING"
+      "type": "STRING",
+      "label": "Data Units  (default = none)"
     },
     {
-      "label": "Disable Current Value Display? (check to remove)",
       "name": "currentData",
-      "type": "BOOLEAN"
+      "type": "BOOLEAN",
+      "label": "Disable Current Value Display? (check to remove)"
     },
     {
+      "label": "Y-Axis Min Value (default = 30)",
       "name": "YaxisMin",
-      "type": "NUMBER",
-      "label": "Y-Axis Min Value (default = 30)"
+      "type": "NUMBER"
     },
     {
-      "name": "YaxisMax",
       "label": "Y-Axis Max Value (default = 110)",
+      "name": "YaxisMax",
       "type": "NUMBER"
     },
     {
       "label": "X-Axis Data Interval Span (default = 20)",
-      "type": "NUMBER",
-      "name": "XaxisSpan"
+      "name": "XaxisSpan",
+      "type": "NUMBER"
     },
     {
       "label": "Disable Auto Scale Y-Axis? (check to disable)",
@@ -48,13 +48,18 @@
       "type": "BOOLEAN"
     },
     {
-      "name": "scaleIncrease",
+      "type": "BOOLEAN",
       "label": "Allow Y-Axis Scale Range to Increase?  (default = disabled)",
+      "name": "scaleIncrease"
+    },
+    {
+      "name": "badValues",
+      "label": "Skip zero values?  (default = No)",
       "type": "BOOLEAN"
     }
   ],
   "name": "Plot Generic",
-  "dimensions": {"height": 2, "width": 2}
+  "dimensions": {"width": 2, "height": 2}
 }
 </script>
 <!-- Do not edit above -->
@@ -159,14 +164,16 @@ function dataArrayParse() {
       contentEl.innerHTML = attribute.currentValue //this approach just replaces the HTML which is more efficient, but can result in image flicker
  // Put Data into chart array 
   x = x + 1.0; // Incriment Data interval count
-  y = parseFloat(contentEl.innerHTML); // Incoming data
+  if (tileSettings.badValues && contentEl.innerHTML == 0) {y = y;}
+    else y = parseFloat(contentEl.innerHTML);
+  
   maxDataCount = x;
   dataArray.push(x); // Add new element to array
   hubDataArray.push(y);
-  
+   
     chartArray[0] = ['X', 'Y']; // column titles
         for (i = 0; i < maxDataCount; i++) {
-          chartArray[i + 1] = [dataArray[i], hubDataArray[i]];
+		   chartArray[i + 1] = [dataArray[i], hubDataArray[i]];
            }  
   // Remove array element if its x position already past off chart, to reduce array size  
   if (x-1 > tileSettings.XaxisSpan) {
@@ -197,11 +204,11 @@ function drawChart(){
   if (YaxisTick0 == 0) {YaxisTick0 = tileSettings.YaxisMin;} // Initalize values
   if (YaxisTick4 == 0) {YaxisTick4 = tileSettings.YaxisMax;}
       
-  // Auto Y-Axis Scale +/- 2% or not
+  // Auto Y-Axis Scale +/- 3% or not
   if (tileSettings.YaxisAutoScale == false) {
 	 if (tileSettings.scaleIncrease == true) {
-  		if (y <  YaxisTick0) {YaxisTick0 = parseInt(y * 0.98);}
-    	if (y >  YaxisTick4) {YaxisTick4 = parseInt(y * 1.02);}
+  		if (y <  YaxisTick0) {YaxisTick0 = parseInt(y * 0.97);}
+    	if (y >  YaxisTick4) {YaxisTick4 = parseInt(y * 1.03);}
    		}
     // Keep Scale Range but adjust window  
 	else if (y <  YaxisTick0) {YaxisTick0 = parseInt(y * 0.98); YaxisTick4 = YaxisTick0 + YaxisRange;}
