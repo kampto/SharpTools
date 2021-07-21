@@ -4,28 +4,28 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
-    {"name": "deviceId", "type": "STRING", "label": "Device ID"},
+    {"type": "STRING", "name": "apiSample", "label": "Sample Maker API URL"},
+    {"name": "deviceId", "label": "Device ID", "type": "STRING"},
     {"type": "STRING", "name": "attribute", "label": "Enter Attribute name"},
     {
       "name": "refreshInterv",
-      "label": "Data Request Interval Minutes (default = 10)",
-      "type": "NUMBER"
+      "type": "NUMBER",
+      "label": "Data Request Interval Minutes (default = 10)"
     },
     {
-      "label": "Data Units  (default = none)",
       "type": "STRING",
+      "label": "Data Units  (default = none)",
       "name": "dataUnits"
     },
     {
       "type": "NUMBER",
-      "name": "numDecimals",
-      "label": "How many decimal places?  (default = 1)"
+      "label": "How many decimal places?  (default = 1)",
+      "name": "numDecimals"
     },
     {
+      "type": "NUMBER",
       "name": "fontSize",
-      "label": "Font Size,   (default = 150)",
-      "type": "NUMBER"
+      "label": "Font Size,   (default = 150)"
     }
   ],
   "name": "Hubitat Device Attribute"
@@ -39,7 +39,7 @@
   <span id="content"><span data-index="0">Loading...</span></span>
 </div>
   
-<!************************ SET CONTENT FORMAT **************************>
+<!--************************ SET CONTENT FORMAT **************************-->
 <style>
   html,body {height: 100%;margin:0;}
   .main-content {
@@ -47,6 +47,7 @@
     height:100%;
     align-items: center;
     justify-content: center;
+    //background-color: #FFFFFF;
   }
   /*:root {--fontSize: tileFontSize; } /* Put variable into <style> */
   .main-content #content {
