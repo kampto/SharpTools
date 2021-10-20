@@ -89,8 +89,9 @@ var x = setInterval(function() {
   // Display the result in the element with id="content"
   if (tileSettings.daysOnly == true) {
   	refresh = 60000;  
-    document.getElementById("content").innerHTML = days + " Days";
-   	}
+    if (days <1){document.getElementById("content").innerHTML = hours + " Hrs";}
+    else {document.getElementById("content").innerHTML = days + " Days";}
+  }
   else if (tileSettings.showSeconds == false){
    	refresh = 60000;  
    	document.getElementById("content").innerHTML = days + " Days <br>" + hours + "h "
@@ -109,3 +110,4 @@ var x = setInterval(function() {
   }
 }, refresh);
 </script>
+
