@@ -4,28 +4,28 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"type": "STRING", "label": "Sample Maker API URL", "name": "apiSample"},
-    {"label": "Device ID", "type": "STRING", "name": "deviceId"},
+    {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
+    {"name": "deviceId", "type": "STRING", "label": "Device ID"},
     {"name": "attribute", "label": "Enter Attribute name", "type": "STRING"},
     {
-      "label": "GaugeLabel (default = Humidity)",
       "type": "STRING",
+      "label": "Gauge Center Label (default = Humidity)",
       "name": "gaugeLabel"
     },
-    {"name": "gaugeUnits", "type": "STRING", "label": "Units (default = %)"},
+    {"name": "gaugeUnits", "label": "Units (default = %)", "type": "STRING"},
     {
       "label": "Number of Decimals (default = 1)",
-      "type": "STRING",
-      "name": "numDecimals"
+      "name": "numDecimals",
+      "type": "STRING"
     },
     {
-      "label": "Refresh Interval Minutes (default = 10)",
       "name": "refreshInterv",
-      "type": "NUMBER"
+      "type": "NUMBER",
+      "label": "Refresh Interval Minutes (default = 10)"
     }
   ],
   "name": "Gauge Humidity",
-  "dimensions": {"width": 2, "height": 2}
+  "dimensions": {"height": 2, "width": 2}
 }
 </script>
 <!-- Do not edit Above -->
@@ -36,6 +36,7 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
 <div id="chart" aliign="center"></div>
+
 
 <style>
   /*************** SET GAUGE SIZE WITHIN TILE ***************/
@@ -48,12 +49,15 @@
    	var chart, chartData;
   	var chartOptions = {
     min: 0, max: 100,
-    redFrom: 75, redTo: 100,
-    yellowFrom:0, yellowTo: 25,
-    greenFrom:25, greenTo: 75,
+	greenFrom:0, greenTo: 100, greenColor: "#DC3912",
+	yellowFrom:10, yellowTo: 90,
+    redFrom: 20, redTo: 80, redColor: "#109618",  
+    //redFrom: 75, redTo: 100, redColor: "#4B9CD3", // Blue: #4B9CD3, Red: #DC3912, Yellow #FF9900, Green: #109618
+    //yellowFrom:0, yellowTo: 25, yellowColor: "#4B9CD3",
+    //greenFrom:25, greenTo: 75,
     minorTicks: 5,
-    //majorTicks: ['10.5', '11.5', '12.5', '13.5', '14.5'], // Major ticks adds Labels to the ticks
-  	};
+    majorTicks: ['0', '', 'Humidity', '', '100'], // Major ticks adds Labels to the ticks
+    };
   
   //Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
   var tileSettings = { 
