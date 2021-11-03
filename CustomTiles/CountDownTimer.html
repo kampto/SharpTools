@@ -5,24 +5,29 @@
   "schema": "0.1.0",
   "settings": [
     {
-      "type": "STRING",
       "label": "Target Date, Use this Format:  Jan 1, 2022 15:00:00",
-      "name": "targetDate"
+      "name": "targetDate",
+      "type": "STRING"
     },
     {
       "label": "Font Size  (default = 130)",
-      "type": "NUMBER",
-      "name": "fontSize"
+      "name": "fontSize",
+      "type": "NUMBER"
     },
     {
-      "name": "daysOnly",
-      "label": "Show Days Only?    (default = No)",
-      "type": "BOOLEAN"
-    },
-    {
-      "name": "showSeconds",
       "type": "BOOLEAN",
-      "label": "Show Seconds?   (default = No)"
+      "name": "daysOnly",
+      "label": "Show Days Only?    (default = No)"
+    },
+    {
+      "name": "showDayHours",
+      "type": "BOOLEAN",
+      "label": "Show Days+Hours Only?    (default = No)"
+    },
+    {
+      "name": "showMin",
+      "label": "Show Days+Hours+Min Only?   (default = No)",
+      "type": "BOOLEAN"
     }
   ],
   "name": "Count Down Timer"
@@ -39,6 +44,7 @@
 <style>
   html,body {height: 100%; margin:0;}
   .main-content {
+    line-height: 1.0; 
     display: flex;
     height:100%;
     align-items: center;
@@ -65,8 +71,10 @@ var refresh = 1000; // starting refresh interval
  function defaultSettings(){
     if(tileSettings.daysOnly == null || tileSettings.daysOnly == "")
     	{tileSettings.daysOnly = false;} 
-    if(tileSettings.showSeconds == null || tileSettings.showSeconds == "")
-    	{tileSettings.showSeconds = false;} 
+    if(tileSettings.showDayHours == null || tileSettings.showDayHours == "")
+    	{tileSettings.showDayHours = false;} 
+    if(tileSettings.showMin == null || tileSettings.showMin == "")
+    	{tileSettings.showMin = false;} 
 	if(tileSettings.fontSize == null || tileSettings.fontSize == "")
     	{tileSettings.fontSize = 130;}  // Default if no entry
     var tileFontSize = tileSettings.fontSize + '%';
@@ -92,7 +100,12 @@ var x = setInterval(function() {
     if (days <1){document.getElementById("content").innerHTML = hours + " Hrs";}
     else {document.getElementById("content").innerHTML = days + " Days";}
   }
-  else if (tileSettings.showSeconds == false){
+
+  else if (tileSettings.showDayHours == true){
+    refresh = 60000;  
+   	document.getElementById("content").innerHTML = days + " Days <br>" + hours + "h "; 
+   	}	
+  else if (tileSettings.showMin == true){
    	refresh = 60000;  
    	document.getElementById("content").innerHTML = days + " Days <br>" + hours + "h "
   	+ minutes + "m "; 
@@ -110,4 +123,3 @@ var x = setInterval(function() {
   }
 }, refresh);
 </script>
-
