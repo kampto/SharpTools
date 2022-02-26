@@ -4,15 +4,15 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
-    {"name": "deviceId", "type": "STRING", "label": "Device ID"},
+    {"type": "STRING", "name": "apiSample", "label": "Sample Maker API URL"},
+    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
     {"name": "attribute", "label": "Enter Attribute name", "type": "STRING"},
     {
       "type": "STRING",
       "label": "Gauge Center Label (default = Humidity)",
       "name": "gaugeLabel"
     },
-    {"name": "gaugeUnits", "label": "Units (default = %)", "type": "STRING"},
+    {"type": "STRING", "name": "gaugeUnits", "label": "Units (default = %)"},
     {
       "label": "Number of Decimals (default = 1)",
       "name": "numDecimals",
@@ -20,12 +20,12 @@
     },
     {
       "name": "refreshInterv",
-      "type": "NUMBER",
-      "label": "Refresh Interval Minutes (default = 10)"
+      "label": "Refresh Interval Minutes (default = 10)",
+      "type": "NUMBER"
     }
   ],
   "name": "Gauge Humidity",
-  "dimensions": {"height": 2, "width": 2}
+  "dimensions": {"width": 2, "height": 2}
 }
 </script>
 <!-- Do not edit Above -->
@@ -40,8 +40,8 @@
 
 <style>
   /*************** SET GAUGE SIZE WITHIN TILE ***************/
-  html,body {height: 107%; margin:-2.2%; justify-content: center;}
-  #chart { height: 100%; width: 100%; }
+  html,body {height: 100%; margin:-2.2%; justify-content: center; }
+  #chart {height: 110%; width: 110%; position:fixed;}
 </style>
 
 <script>
