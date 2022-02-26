@@ -4,17 +4,17 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"type": "STRING", "name": "apiSample", "label": "Sample Maker API URL"},
+    {"label": "Sample Maker API URL", "name": "apiSample", "type": "STRING"},
     {"type": "STRING", "name": "deviceId", "label": "Device ID"},
     {"label": "Enter Attribute name", "name": "attribute", "type": "STRING"},
     {
+      "name": "refreshInterv",
       "type": "NUMBER",
-      "label": "Data Request Interval Minutes (default = 5)",
-      "name": "refreshInterv"
+      "label": "Data Request Interval Minutes (default = 5)"
     }
   ],
   "name": "Tank Level",
-  "dimensions": {"width": 2, "height": 2}
+  "dimensions": {"height": 2, "width": 2}
 }
 </script>
 <!-- Do not edit above -->
@@ -33,14 +33,17 @@
 <div id="ac_style_samples-bct-pointers-and-data-tank-16" style="display:none;">
 
 html, body, #container {
-    width: 27%;  
-    height: 32%; 
+    width: 30%;  
+    height: 35%; 
     margin: 0;
-    padding: 0;
+    /padding: 0;
   	padding-top: 4px;
-    }  
+  	}  
 </div>
- 
+  <style>
+  html,body {height: 100%; margin:-2%; justify-content: center; position:fixed; }
+  </style>
+  
 <script>(function(){
 function ac_add_to_head(el){
 	var head = document.getElementsByTagName('head')[0];
@@ -131,7 +134,7 @@ function dataArrayParse() {
       if(attribute == null) return showError("Could not find desired attribute");
     var value = attribute.currentValue;    
     contentEl.innerHTML = "";  // Change "" to attribute.currentValue to add value to chart top 
-    
+
 /******************* anyCharts Gauge Set-up ********************/ 
   anychart.onDocumentReady(function () {
   
@@ -178,7 +181,7 @@ function dataArrayParse() {
   // Set Gauge Text
   gauge.label()
     .fontStyle('bold') // normal, bold
-    .fontColor('Black')
+    .fontColor('Black')  // Main Level % Color
     .text(value+'%') // data Value
     .anchor('center') //set the position of the label
     .adjustFontSize(true)
@@ -230,3 +233,4 @@ function getThing(){
  
 </script>
  
+</div>
