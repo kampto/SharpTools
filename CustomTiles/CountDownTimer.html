@@ -63,6 +63,71 @@ var refresh = 1000; // starting refresh interval
 
  //when the tile is ready, get the settings from the callback
   stio.ready(function(data){
+<!-- kampto  ver. June03-2021, for SharpTools -->
+<!-- Do not edit below -->
+<script type="application/json" id="tile-settings">
+{
+  "schema": "0.1.0",
+  "settings": [
+    {
+      "label": "Target Date, Use this Format:  Jan 1, 2022 15:00:00",
+      "name": "targetDate",
+      "type": "STRING"
+    },
+    {
+      "label": "Font Size  (default = 130)",
+      "name": "fontSize",
+      "type": "NUMBER"
+    },
+    {
+      "type": "BOOLEAN",
+      "name": "daysOnly",
+      "label": "Show Days Only?    (default = No)"
+    },
+    {
+      "name": "showDayHours",
+      "type": "BOOLEAN",
+      "label": "Show Days+Hours Only?    (default = No)"
+    },
+    {
+      "name": "showMin",
+      "label": "Show Days+Hours+Min Only?   (default = No)",
+      "type": "BOOLEAN"
+    }
+  ],
+  "name": "Count Down Timer"
+}
+</script>
+<!-- Do not edit above -->
+<script src="//cdn.sharptools.io/js/custom-tiles.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<div class="main-content">
+  <span id="content"><span data-index="0">Loading...</span></span>
+</div>
+  
+<!--************************ SET CONTENT FORMAT **************************-->
+<style>
+  html,body {height: 100%; margin:0;}
+  .main-content {
+    line-height: 1.0; 
+    display: flex;
+    height:100%;
+    align-items: center;
+    justify-content: center;
+    //background-color: #FFFFFF;
+  }
+  .main-content #content {
+    font-size: 80%;  /* Change Font Size */
+    text-align: center; /* OPTIONAL center align any text that gets injected */
+  }
+</style>
+
+<script>
+var contentEl = document.getElementById("content");
+var refresh = 1000; // starting refresh interval   
+
+ //when the tile is ready, get the settings from the callback
+  stio.ready(function(data){
     tileSettings = data.settings; //Tile editor settings
     defaultSettings();  //and initialize the tile
   });
