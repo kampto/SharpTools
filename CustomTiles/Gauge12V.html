@@ -1,31 +1,32 @@
 <!-- kampto  ver. April25-2021, for SharpTools -->
+<!--Import URL  https://sharptools.io/developer/custom-tiles/import/?url=https://raw.githubusercontent.com/kampto/SharpTools/main/CustomTiles/Gauge12V.html -->
 <!-- Do not edit Below -->
 <script type="application/json" id="tile-settings">
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "label": "Sample Maker API URL", "type": "STRING"},
+    {"label": "Sample Maker API URL", "name": "apiSample", "type": "STRING"},
     {"type": "STRING", "label": "Device ID", "name": "deviceId"},
-    {"type": "STRING", "name": "attribute", "label": "Enter Attribute name"},
+    {"type": "STRING", "label": "Enter Attribute name", "name": "attribute"},
     {
-      "type": "STRING",
-      "label": "GaugeLabel (default = Volts)",
-      "name": "gaugeLabel"
-    },
-    {"type": "STRING", "name": "gaugeUnits", "label": "Units (default = V)"},
-    {
-      "name": "numDecimals",
-      "label": "Number of Decimals (default = 2)",
+      "name": "gaugeLabel",
+      "label": "Gauge Center Label (default = Volts)",
       "type": "STRING"
     },
+    {"label": "Units (default = V)", "type": "STRING", "name": "gaugeUnits"},
     {
-      "type": "NUMBER",
+      "name": "numDecimals",
+      "type": "STRING",
+      "label": "Number of Decimals (default = 2)"
+    },
+    {
+      "name": "refreshInterv",
       "label": "Refresh Interval Minutes (default = 10)",
-      "name": "refreshInterv"
+      "type": "NUMBER"
     }
   ],
   "name": "Gauge 12V",
-  "dimensions": {"width": 2, "height": 2}
+  "dimensions": {"height": 2, "width": 2}
 }
 </script>
 <!-- Do not edit Above -->
@@ -39,8 +40,9 @@
 
 <style>
   /*************** SET GAUGE SIZE WITIN TILE ***************/
-  html,body {height: 107%; margin:-2.2%; justify-content: center;}
-  #chart { height: 100%; width: 100%; }
+  html,body {height: 100%; margin:-2.2%; justify-content: center; }
+  #chart {height: 110%; width: 110%; position:fixed; }
+
 </style>
 
 <script>
@@ -52,7 +54,7 @@
     yellowFrom:11.5, yellowTo: 12.0,
     greenFrom:12.0, greenTo: 14.5,
     minorTicks: 5,
-    majorTicks: ['10.5', '11.5', '12.5', '13.5', '14.5'], // Major ticks adds Labels to the ticks
+    majorTicks: ['10.5', '', '12.5', '', '14.5'], // Major ticks adds Labels to the ticks
   	};
   
   //Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
@@ -140,6 +142,7 @@ function initChart() {
       ['Volts', 0], // Default inside gauge label
     ]);  
     chart = new google.visualization.Gauge(document.getElementById('chart'));
+  
   }
   
   function refresh(){
@@ -206,4 +209,5 @@ function initChart() {
       showError("Error communicating with Maker API")
     })
   }
+
 </script>
