@@ -5,12 +5,12 @@
   "schema": "0.1.0",
   "settings": [
     {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
-    {"label": "Device ID", "type": "STRING", "name": "deviceId"},
+    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
     {"type": "STRING", "label": "Enter Attribute name", "name": "attribute"},
     {
       "name": "gaugeLabel",
-      "label": "GaugeLabel (default = Temp)",
-      "type": "STRING"
+      "type": "STRING",
+      "label": "Gauge Center Label (default = Temp)"
     },
     {"type": "STRING", "name": "gaugeUnits", "label": "Units (default = °F)"},
     {
@@ -39,8 +39,8 @@
 
 <style>
   /*************** SET GAUGE SIZE WITHIN TILE ***************/
-  html,body {height: 107%; margin:-2.2%; justify-content: center;}
-  #chart { height: 100%; width: 100%; }
+  html,body {height: 100%; margin:-2.2%; justify-content: center; }
+  #chart {height: 110%; width: 110%; position:fixed; }
 </style>
 
 <script>
@@ -49,10 +49,10 @@
   	var chartOptions = {
     min: 30, max: 110,
     redFrom: 90, redTo: 110,
-    yellowFrom:75, yellowTo: 90,
-    greenFrom:55, greenTo: 75,
+    yellowFrom:30, yellowTo: 55, yellowColor: "#4B9CD3",  // Blue "#4B9CD3",
+    greenFrom:55, greenTo: 90,
     minorTicks: 5,
-    //majorTicks: ['10.5', '11.5', '12.5', '13.5', '14.5'], // Major ticks adds Labels to the ticks
+    majorTicks: ['30', '', '70', '', '110'], // Major ticks adds Labels to the ticks
   	};
   
   //Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
@@ -139,7 +139,7 @@ function initChart() {
 //**************** SET UP Default Gauge Center Label **************/
       ['Temp', 0], // Default inside gauge label
     ]);  
-    chart = new google.visualization.Gauge(document.getElementById('chart'));
+  chart = new google.visualization.Gauge(document.getElementById('chart'));
   }
   
   function refresh(){
