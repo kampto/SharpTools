@@ -4,43 +4,43 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"label": "Sample Maker API URL", "name": "apiSample", "type": "STRING"},
-    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
-    {"name": "attribute", "label": "Enter Attribute name", "type": "STRING"},
+    {"type": "STRING", "label": "Sample Maker API URL", "name": "apiSample"},
+    {"type": "STRING", "label": "Device ID", "name": "deviceId"},
+    {"label": "Enter Attribute name", "name": "attribute", "type": "STRING"},
     {
-      "label": "Data Request Interval Minutes (default = 5)",
       "type": "NUMBER",
-      "name": "refreshInterv"
+      "name": "refreshInterv",
+      "label": "Data Request Interval Minutes (default = 5)"
     },
     {
       "label": "Chart Title (default = none)",
-      "name": "chartTitle",
-      "type": "STRING"
-    },
-    {
-      "name": "dataUnits",
       "type": "STRING",
-      "label": "Data Units  (default = none)"
+      "name": "chartTitle"
     },
     {
+      "label": "Data Units  (default = none)",
+      "type": "STRING",
+      "name": "dataUnits"
+    },
+    {
+      "label": "Disable Current Value Display? (check to remove)",
       "name": "currentData",
-      "type": "BOOLEAN",
-      "label": "Disable Current Value Display? (check to remove)"
+      "type": "BOOLEAN"
     },
     {
-      "label": "Y-Axis Min Value (default = 30)",
+      "type": "NUMBER",
       "name": "YaxisMin",
-      "type": "NUMBER"
+      "label": "Y-Axis Min Value (default = 30)"
     },
     {
       "label": "Y-Axis Max Value (default = 110)",
-      "name": "YaxisMax",
-      "type": "NUMBER"
+      "type": "NUMBER",
+      "name": "YaxisMax"
     },
     {
-      "label": "X-Axis Data Interval Span (default = 20)",
+      "type": "NUMBER",
       "name": "XaxisSpan",
-      "type": "NUMBER"
+      "label": "X-Axis Data Interval Span (default = 20)"
     },
     {
       "label": "Disable Auto Scale Y-Axis? (check to disable)",
@@ -48,18 +48,23 @@
       "type": "BOOLEAN"
     },
     {
-      "type": "BOOLEAN",
+      "name": "scaleIncrease",
       "label": "Allow Y-Axis Scale Range to Increase?  (default = disabled)",
-      "name": "scaleIncrease"
+      "type": "BOOLEAN"
     },
     {
       "name": "badValues",
       "label": "Skip zero values?  (default = No)",
       "type": "BOOLEAN"
+    },
+    {
+      "label": "Title Font Size  (default = 12)",
+      "type": "NUMBER",
+      "name": "fontSize"
     }
   ],
   "name": "Plot Generic",
-  "dimensions": {"width": 2, "height": 2}
+  "dimensions": {"height": 2, "width": 2}
 }
 </script>
 <!-- Do not edit above -->
@@ -71,9 +76,9 @@
 
 <style>
 /******************** SET CHART SIZE WITHIN TILE ********************/
-  html,body {height: 100%; margin:0%; justify-content: center;}
-  #chart_div { height: 100%; width: 110%; } /*availble usable area inside tile not including tile label at top*/
-</style>
+  html,body {height: 100%; margin:1%; justify-content: center;}
+  #chart_div { height: 100%; width: 110%; position:fixed;} /*availble usable area inside tile not including tile label at top*/
+  </style>
 
 <script>
 //Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
@@ -120,6 +125,9 @@ google.charts.load('current', {packages: ['corechart', 'line']});
     	{tileSettings.YaxisMin = 30;}  
   if (tileSettings.YaxisMax == null || tileSettings.YaxisMax == "")
   		{tileSettings.YaxisMax = 110;}  
+  if(tileSettings.fontSize == null || tileSettings.fontSize == "")
+    	{tileSettings.fontSize = 12;}  // Default if no entry
+    
   }
 
   //parse out the various components from a provided Maker API URL
@@ -227,13 +235,14 @@ function drawChart(){
    
 /******************** SET CHART AREA PARAMETERS ********************/ 
   var options = {
-    chartArea: {top: 37,  width: '72%', height: '67%'}, // Chart deadspace and vert padding
+    chartArea: {top: 20,  width: '70%', height: '65%'}, // Chart deadspace and vert padding
     //theme: 'maximized',  // puts all axis & titles inside chart
     //titlePosition: 'in', // Move title in chart
     //axisTitlesPosition: 'in',
-    curveType: 'function', // 'function' for curves
+  
+     curveType: 'function', // 'function' for curves
     title: chartTitleDisplay,
-    titleTextStyle: {fontSize: 14, bold: true, color: '#FFFFFF'},
+    titleTextStyle: {fontSize: tileSettings.fontSize, bold: false, color: '#FFFFFF'},
     legend: 'none',
     series: {
             0: {lineWidth: 4, color: '#FFFF00' }
@@ -241,7 +250,7 @@ function drawChart(){
     backgroundColor: 'transparent',  //backgroundColor: '#f1f8e9'
     hAxis: {
       //title: 'Time',
-      textStyle:{fontSize: 10, bold: false, italic: false, color: '#FFFFFF'},
+      textStyle:{fontSize: 9, bold: false, italic: false, color: '#FFFFFF'},
       baselineColor: '#FFFFFF',
       gridlineColor: '#FFFFFF',
       format:'#',  // Remove decimals if any
