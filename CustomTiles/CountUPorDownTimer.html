@@ -203,25 +203,26 @@ var x = setInterval(function() {
   // Display the result in the element with id="content"
   else if (tileSettings.showWeeksDays == true) {
   	refresh = 60000;  
-    if (hours < 1) {document.getElementById("content").innerHTML = minutes + " Min";}
-    else if (days <1){document.getElementById("content").innerHTML = hours + " Hrs";}
-    else if (weeks <1){document.getElementById("content").innerHTML = days + " Days <br>" + hours + "h ";}
+    if (hours < 1) {document.getElementById("content").innerHTML = minutes + " min";}
+    else if (days <1){document.getElementById("content").innerHTML = hours + " hr";}
+    else if (weeks <1){document.getElementById("content").innerHTML = days + " Days <br>" + hours + " hr";}
     else {document.getElementById("content").innerHTML = weeks + " Weeks <br>" + dayAfterweeks + " Days";}
   	}  
   else if (tileSettings.daysOnly == true) {
   	refresh = 60000;  
-    if (hours < 1) {document.getElementById("content").innerHTML = minutes + " Min";}
-    else if (days < 1){document.getElementById("content").innerHTML = hours + " Hrs";}
+    if (hours < 1) {document.getElementById("content").innerHTML = minutes + " min";}
+    else if (days < 1){document.getElementById("content").innerHTML = hours + " hr";}
     else {document.getElementById("content").innerHTML = days + " Days";}
   	}
   else if (tileSettings.showDayHours == true){
     refresh = 60000;  
-    if (hours < 1) {document.getElementById("content").innerHTML = minutes + " Min";}
-   	else document.getElementById("content").innerHTML = days + " Days <br>" + hours + "Hrs "; 
+    if (hours < 1) {document.getElementById("content").innerHTML = minutes + " min";}
+   	else document.getElementById("content").innerHTML = days + " Days <br>" + hours + " hr"; 
    	}	
   else if (tileSettings.showMin == true){
-    if (minutes < 1 ) {refresh = 1000; document.getElementById("content").innerHTML = minutes + "m " + seconds + "s ";}	
-    else {refresh = 60000; document.getElementById("content").innerHTML = days + " Days <br>" + hours + "h " + minutes + "m ";}
+    if (minutes < 1 ) {refresh = 1000; document.getElementById("content").innerHTML = minutes + "min <br>" + seconds + " sec";}
+    else if (days < 1) {refresh = 60000; document.getElementById("content").innerHTML = hours + " hr <br>" + minutes + " min";}  
+    else {refresh = 60000; document.getElementById("content").innerHTML = days + " Days <br>" + hours + " hr " + minutes + " min ";}
     }
   else {
   	refresh = 1000;  
