@@ -1,0 +1,233 @@
+<!-- kampto  ver. June03-2021, for SharpTools -->
+<!-- Do not edit below -->
+<script type="application/json" id="tile-settings">
+{
+  "schema": "0.1.0",
+  "settings": [
+    {
+      "label": "Stop (or Start) target Date, Use this Format:  Jan 1, 2022 15:00:00",
+      "name": "targetDate",
+      "type": "STRING"
+    },
+    {
+      "name": "countUp",
+      "label": "Count Up instead of Down?  (default = No)",
+      "type": "BOOLEAN"
+    },
+    {
+      "label": "Timer Expire Message  (default = EXPIRED)",
+      "type": "STRING",
+      "name": "expMSG"
+    },
+    {
+      "label": "Font Size  (default = 130)",
+      "type": "NUMBER",
+      "name": "fontSize"
+    },
+    {
+      "label": "Show Weeks + Days?  (default = No)",
+      "name": "showWeeksDays",
+      "type": "BOOLEAN"
+    },
+    {
+      "name": "daysOnly",
+      "label": "Show Days Only?    (default = No)",
+      "type": "BOOLEAN"
+    },
+    {
+      "label": "Show Days+Hours?  (default = No)",
+      "type": "BOOLEAN",
+      "name": "showDayHours"
+    },
+    {
+      "type": "BOOLEAN",
+      "name": "showMin",
+      "label": "Show Days+Hours+Min? (default = No)"
+    },
+    {
+      "name": "expDays",
+      "label": "Count-Up, Expiration Days? (default = 1000, from start date)",
+      "type": "STRING"
+    },
+    {
+      "name": "fontColor",
+      "label": "Font Color;  red, blue, black, etc.. (default = white)",
+      "type": "STRING"
+    },
+    {
+      "name": "expColor",
+      "label": "Expired Tile Color;  red, blue, black, etc.. (default = none)",
+      "type": "STRING"
+    },
+    {
+      "name": "expPulse",
+      "label": "Pulse content when counter expires? (default = No)",
+      "type": "BOOLEAN"
+    }
+  ],
+  "name": "Count Up/Down Timer"
+}
+</script>
+<!-- Do not edit above -->
+<script src="//cdn.sharptools.io/js/custom-tiles.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<div class="main-content">
+  <span id="content"><span data-index="0">Loading...</span></span>
+
+  <!-- <button type="button" class="button" onclick="alert('Count Reset!')">Reset</button> -->
+</div>
+
+<!--**************** SET TILE & CONTENT FORMAT *****************-->
+<style>
+  html,body {height: 100%; margin:0;}
+  .main-content {
+    line-height: 1.0; 
+    display: flex;
+    height:100%;
+    align-items: center;
+    justify-content: center;
+    background-color: none;  /* use tile editor instead */
+    }
+  .main-content #content {
+    font-size: 80%;  /* Change Font Size, tile editor can override */
+    text-align: center; 
+  	color: white;  /* Or use Hex like   color: #FF0000;  */
+    animation: none;
+    }
+  
+  .button {
+	top:78%;
+   	left:28%;
+    width:44%; /* Button width, center is leftx2 + width = 100 */
+    height:20%; 
+    position: absolute;
+   	background-color: #4CAF50; /* Green */
+  	border: 1px solid white;  /*  or none; */
+  	border-radius: 4px;
+  	color: white;
+  	padding: 0px 0px;  /* text position relative to sides */
+    	//justify-content: center;
+  	text-align: center;
+  		//text-decoration: none;
+  		//display: inline-block;
+  	font-size: .45rem; /* try rem to scale */
+    //opacity: 0 /* To hide button */
+   	}
+
+  .button:hover {
+  		//background-color: #4CAF50;
+  	color: red;
+    //opacity: 0 /* To hide button */
+ 	}
+
+/* Text blink details */
+@keyframes blinkMe {
+ 0% { opacity: 0;}
+ 50% { opacity: 1;}
+ 100% { opacity: 0;}
+}
+   
+</style>
+
+<script>
+var contentEl = document.getElementById("content");
+var refresh = 1000; // starting refresh interval 
+
+ //when the tile is ready, get the settings from the callback
+  stio.ready(function(data){
+    tileSettings = data.settings; //Tile editor settings
+    defaultSettings();  //and initialize the tile
+  });
+
+/******************** DEFAULT TILE SETTINGS ********************/
+ function defaultSettings(){
+    if(tileSettings.daysOnly == null || tileSettings.daysOnly == "")
+    	{tileSettings.daysOnly = false;} 
+    if(tileSettings.showDayHours == null || tileSettings.showDayHours == "")
+    	{tileSettings.showDayHours = false;} 
+    if(tileSettings.showMin == null || tileSettings.showMin == "")
+    	{tileSettings.showMin = false;} 
+  	if(tileSettings.showWeeksDays == null || tileSettings.showWeeksDays == "")
+    	{tileSettings.showWeeksDays = false;} 
+  	if(tileSettings.countUp == null || tileSettings.countUp == "")
+    	{tileSettings.countUp = false;} 
+   	if(tileSettings.expMSG == null || tileSettings.expMSG == "")
+    	{tileSettings.expMSG = "EXPIRED";}  
+   	if(tileSettings.expColor == null || tileSettings.expColor == "")
+    	{tileSettings.expColor = "none";}  
+   	if(tileSettings.expDays == null || tileSettings.expDays == "")
+    	{tileSettings.expDays = 1000;}  
+   	if(tileSettings.expPulse == null || tileSettings.expPulse == "")
+    	{tileSettings.expPulse = false;} 
+   		var animationString = "none";
+	if(tileSettings.fontSize == null || tileSettings.fontSize == "")
+    	{tileSettings.fontSize = 130;}  
+   	    var tileFontSize = tileSettings.fontSize + '%';
+   		document.documentElement.style.setProperty('font-size', tileFontSize, 'important');  // Pass value into style variable
+   if(tileSettings.fontColor == null || tileSettings.fontColor == "")
+    	{tileSettings.fontColor = "white";}  
+		document.getElementById("content").style.color = tileSettings.fontColor;
+ 	//var resetCount = 0;  
+ }  
+
+var x = setInterval(function() {
+  var countDownDate = new Date(tileSettings.targetDate).getTime();
+  var now = new Date().getTime(); // Get today's date and time
+  // Find the distance between now and the count down date
+  if (tileSettings.countUp) {var distance = now - countDownDate;}
+  else {var distance = countDownDate - now;}
+  
+  // Time calculations for weeks, days, hours, minutes, and seconds
+  var weeks = Math.floor(distance / (1000 * 60 * 60 * 24 * 7));
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var dayAfterweeks = Math.floor((distance  / (1000 * 60 * 60 * 24)) /7);
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  // If the counter is finished, display some text and formatting
+  if ((tileSettings.countUp == false && distance < 0) || (tileSettings.countUp && days >= tileSettings.expDays)){
+    var expired = true; animationString = "blinkMe 1s linear infinite";}
+  	else {var expired = false; 
+      document.documentElement.style.removeProperty('background-color');
+      animationString = "none"
+         }
+    
+  if (expired) { clearInterval(x); 
+    document.getElementById("content").innerHTML = tileSettings.expMSG;
+   	document.documentElement.style.setProperty('background-color', tileSettings.expColor, 'important');
+  	if (tileSettings.expPulse) {
+      document.getElementById("content").style.animation = animationString;
+       	}
+     }
+     
+  // Display the result in the element with id="content"
+  else if (tileSettings.showWeeksDays == true) {
+  	refresh = 60000;  
+    if (hours < 1) {document.getElementById("content").innerHTML = minutes + " Min";}
+    else if (days <1){document.getElementById("content").innerHTML = hours + " Hrs";}
+    else if (weeks <1){document.getElementById("content").innerHTML = days + " Days <br>" + hours + "h ";}
+    else {document.getElementById("content").innerHTML = weeks + " Weeks <br>" + dayAfterweeks + " Days";}
+  	}  
+  else if (tileSettings.daysOnly == true) {
+  	refresh = 60000;  
+    if (hours < 1) {document.getElementById("content").innerHTML = minutes + " Min";}
+    else if (days < 1){document.getElementById("content").innerHTML = hours + " Hrs";}
+    else {document.getElementById("content").innerHTML = days + " Days";}
+  	}
+  else if (tileSettings.showDayHours == true){
+    refresh = 60000;  
+    if (hours < 1) {document.getElementById("content").innerHTML = minutes + " Min";}
+   	else document.getElementById("content").innerHTML = days + " Days <br>" + hours + "Hrs "; 
+   	}	
+  else if (tileSettings.showMin == true){
+    if (minutes < 1 ) {refresh = 1000; document.getElementById("content").innerHTML = minutes + "m " + seconds + "s ";}	
+    else {refresh = 60000; document.getElementById("content").innerHTML = days + " Days <br>" + hours + "h " + minutes + "m ";}
+    }
+  else {
+  	refresh = 1000;  
+    document.getElementById("content").innerHTML = days + " Days <br>"  + hours + "h "
+  	+ minutes + "m " + seconds + "s ";
+   	}
+}, refresh);
+</script>
