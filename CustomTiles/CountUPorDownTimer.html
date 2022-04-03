@@ -5,9 +5,9 @@
   "schema": "0.1.0",
   "settings": [
     {
+      "label": "Stop (or Start) target Date, Use this Format:  Jan 1, 2022 15:00:00",
       "name": "targetDate",
-      "type": "STRING",
-      "label": "Stop (or Start) target Date, Use this Format:  Jan 1, 2022 15:00:00"
+      "type": "STRING"
     },
     {
       "label": "Count Up instead of Down?  (default = No)",
@@ -15,29 +15,29 @@
       "name": "countUp"
     },
     {
+      "name": "expMSG",
       "type": "STRING",
-      "label": "Timer Expire Message  (default = EXPIRED)",
-      "name": "expMSG"
+      "label": "Timer Expire Message  (default = EXPIRED)"
     },
     {
-      "type": "NUMBER",
       "label": "Font Size  (default = 130)",
+      "type": "NUMBER",
       "name": "fontSize"
     },
     {
-      "type": "BOOLEAN",
       "label": "Show Weeks + Days, 2-row?  (default = No)",
-      "name": "showWeeksDays"
-    },
-    {
-      "name": "daysOnly",
-      "label": "Show Days Only, 1-row?    (default = No)",
+      "name": "showWeeksDays",
       "type": "BOOLEAN"
     },
     {
       "type": "BOOLEAN",
-      "label": "Show Days+Hours, 2-row?  (default = No)",
-      "name": "showDayHours"
+      "name": "daysOnly",
+      "label": "Show Days Only, 1-row?    (default = No)"
+    },
+    {
+      "type": "BOOLEAN",
+      "name": "showDayHours",
+      "label": "Show Days+Hours, 2-row?  (default = No)"
     },
     {
       "name": "showDayHoursSingleRow",
@@ -45,23 +45,23 @@
       "type": "BOOLEAN"
     },
     {
-      "label": "Count-Up, Expiration Days? (default = 1000, from start date)",
       "name": "expDays",
-      "type": "NUMBER"
+      "type": "NUMBER",
+      "label": "Count-Up, Expiration Days? (default = 1000, from start date)"
     },
     {
-      "type": "STRING",
       "name": "fontColor",
+      "type": "STRING",
       "label": "Font Color;  red, blue, black, etc.. (default = white)"
     },
     {
-      "type": "STRING",
       "label": "Expired Tile Color;  red, blue, black, etc.. (default = none)",
+      "type": "STRING",
       "name": "expColor"
     },
     {
-      "name": "expPulse",
       "label": "Pulse content when counter expires? (default = No)",
+      "name": "expPulse",
       "type": "BOOLEAN"
     }
   ],
@@ -74,8 +74,6 @@
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <div class="main-content">
   <span id="content"><span data-index="0">Loading...</span></span>
-
-  <!-- <button type="button" class="button" onclick="alert('Count Reset!')">Reset</button> -->
 </div>
 
 <!--**************** SET TILE & CONTENT FORMAT *****************-->
@@ -96,37 +94,12 @@
     animation: none;
     }
   
-  .button {
-	top:78%;
-   	left:28%;
-    width:44%; /* Button width, center is leftx2 + width = 100 */
-    height:20%; 
-    position: absolute;
-   	background-color: #4CAF50; /* Green */
-  	border: 1px solid white;  /*  or none; */
-  	border-radius: 4px;
-  	color: white;
-  	padding: 0px 0px;  /* text position relative to sides */
-    //justify-content: center;
-  	text-align: center;
-   	//display: inline-block;
-  	font-size: .45rem; /* try rem to scale */
-    //opacity: 0 /* To hide button */
-   	}
-
-  .button:hover {
-  	//background-color: #4CAF50;
-  	color: red;
-    //opacity: 0 /* To hide button */
- 	}
-
 /* Text blink details */
 @keyframes blinkMe {
  0% { opacity: 0;}
  50% { opacity: 1;}
  100% { opacity: 0;}
 }
-   
 </style>
 
 <script>
@@ -167,7 +140,6 @@ var refresh = 1000; // starting refresh interval
    if(tileSettings.fontColor == null || tileSettings.fontColor == "")
     	{tileSettings.fontColor = "white";}  
 		document.getElementById("content").style.color = tileSettings.fontColor;
- 	//var resetCount = 0;  
  }  
 
 var x = setInterval(function() {
@@ -201,7 +173,7 @@ var x = setInterval(function() {
        	}
      }
       
-  // Display the result in the element with id="content"
+  // Display the result and time format
   else if (tileSettings.showWeeksDays == true) {
   	if (weeks >= 1) {document.getElementById("content").innerHTML = weeks + " Weeks<br>" + dayAfterweeks + " Days";}
     else if (days >= 1) {document.getElementById("content").innerHTML = days + " Days<br>" + hours + " hr";}
