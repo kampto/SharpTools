@@ -1,0 +1,317 @@
+<!-- kampto  ver. May09-2021, for SharpTools -->
+<!-- Do not edit below -->
+<script type="application/json" id="tile-settings">
+{
+  "schema": "0.1.0",
+  "settings": [
+    {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
+    {"type": "STRING", "label": "Device ID", "name": "deviceId"},
+    {"label": "Enter Attribute name", "type": "STRING", "name": "attribute"},
+    {
+      "name": "refreshInterv",
+      "type": "NUMBER",
+      "label": "Data Request Interval Minutes (default = 5)"
+    },
+    {
+      "label": "Data Units  (default = none)",
+      "name": "dataUnits",
+      "type": "STRING"
+    },
+    {
+      "label": "Disable Current Value Display? (check to remove)",
+      "type": "BOOLEAN",
+      "name": "currentData"
+    },
+    {
+      "label": "X-Axis data span, # points on axis (default = 20)",
+      "name": "XaxisSpan",
+      "type": "NUMBER"
+    },
+    {
+      "type": "BOOLEAN",
+      "name": "badValues",
+      "label": "Skip zero values?  (default = No)"
+    },
+    {
+      "name": "fontSize",
+      "label": "Title Font Size  (default = 20)",
+      "type": "NUMBER"
+    },
+    {
+      "name": "verticalPos",
+      "type": "STRING",
+      "label": "Value vertical position; 0 to 100,  (default = 50, middle)"
+    },
+    {
+      "label": "Font Color;  red, blue, black, etc.. (default = white)",
+      "type": "STRING",
+      "name": "fontColor"
+    },
+    {
+      "name": "lineColor",
+      "label": "Line Color;  orange, red, black, etc.. (default = yellow)",
+      "type": "STRING"
+    }
+  ],
+  "name": "Plot Area"
+}
+</script>
+<!-- Do not edit above -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script src="//cdn.sharptools.io/js/custom-tiles.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<div id="chart_div"></div>
+<div class="main-value"> 
+  <span id="value" <span="" data-index="0">Loading...</span>
+</div>
+
+<style>
+/******************** SET CHART SIZE WITHIN TILE ********************/
+  html,body {height: 100%; width: 100%; margin:0%; justify-content: center;}
+  #chart_div {height: 100%; width: 104%; 
+              margin-left:-1%; content: center; position:fixed;
+              } /*availble usable area inside tile not including tile label at top*/
+
+  	.main-value #value {
+   	position: absolute;
+    text-align: center;
+  	top: 50%;
+  	left: 50%;
+  	transform: translate(-50%, -50%);
+    text-shadow: 0 0 3px black; /* change 0px to 5px or other #px*/
+    }
+  
+  .#value {
+    color: white;  /* Or use Hex like   color: #FF0000;  */
+    font-size: 10px;
+    
+    }
+</style>
+
+<script>
+//Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
+var tileSettings = { 
+  	// apiSample: "https://cloud.hubitat.com/api/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/apps/999/devices?access_token=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
+    // deviceId: "185",
+    // attribute: "temperature"
+    }
+var apiSettings = {};
+var x = 0.0;
+var y = 0.0;
+var dataArray = new Array();
+var chartArray = new Array();
+var hubDataArray = new Array();
+var YaxisTick0 = 80;
+var YaxisTick4 = 80;   
+var startValue = true; // initialize the starting value  
+var contentEl = document.getElementById("chart_div");
+var contentE2 = document.getElementById("value"); // Non-Chart related
+maxDataCount = 0;
+google.charts.load('current', {packages: ['corechart', 'line']});
+
+ //when the tile is ready, get the settings from the callback
+  stio.ready(function(data){
+    tileSettings = data.settings; //apiSample, deviceId, attribute
+    init();  //and initialize the tile
+  });
+
+  function init(){
+    parseApiSample();  //parse the relevant settings out of the apiSample
+    defaultSettings();
+    valuePollingScheduler();
+    }
+
+/******************** DEFAULT TILE SETTINGS ********************/
+  function defaultSettings(){
+  if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
+    	{tileSettings.refreshInterv = 5;}  // Default if no entry
+  if(tileSettings.XaxisSpan == null || tileSettings.XaxisSpan == "")
+    	{tileSettings.XaxisSpan = 20;}  
+  if(tileSettings.chartTitle == null || tileSettings.chartTitle == "")
+    	{tileSettings.chartTitle = "";}  
+  if(tileSettings.dataUnits == null || tileSettings.dataUnits == "")
+    	{tileSettings.dataUnits = "";}  
+  if(tileSettings.fontSize == null || tileSettings.fontSize == "")
+    	{tileSettings.fontSize = 15;}  // Default if no entry
+    var tileFontSize = tileSettings.fontSize + 'px';
+		document.documentElement.style
+    	.setProperty('font-size', tileFontSize, 'important');  // Pass value into style variable
+  if(tileSettings.verticalPos == null || tileSettings.verticalPos == "")
+    	{tileSettings.verticalPos = 50;}  // Default if no entry
+    var tileVerticalPos = tileSettings.verticalPos + '%';
+		document.getElementById('value').style
+      	.setProperty('top', tileVerticalPos, 'important');
+  if(tileSettings.fontColor == null || tileSettings.fontColor == "")
+    	{tileSettings.fontColor = "white";}  
+		document.getElementById("value").style.color = tileSettings.fontColor;  
+  if(tileSettings.lineColor == null || tileSettings.lineColor == "")
+    	{tileSettings.lineColor = "yellow";}  
+  }
+
+  //parse out the various components from a provided Maker API URL
+  function parseApiSample(sampleUrl){
+    //if we weren't passed in an explicit URL to parse
+    if(sampleUrl == null){
+      //then try to use the sample API URL from the tile settings
+      sampleUrl = tileSettings.apiSample;
+    }
+    //if no URL was provided, let the user know
+    if(sampleUrl == null || sampleUrl === "") showError("No API URL was provided. Please configure the tile.");
+    //if the api isn't the cloud API, let the user know
+    if(sampleUrl.indexOf("cloud.hubitat.com") < 0) showError("Please use the Hubitat Maker API CLOUD URI.")
+
+    //try to parse out the various parts of the URL we need with a regular expression
+    var re = /https:\/\/cloud\.hubitat\.com\/api\/([^\/]+)\/apps\/([\d]+)\/[^\?]+\?access_token\=([^\&]+)/;
+    var match = sampleUrl.match(re); //array of the various regex matches (0: full string, 1: hub id, 2: app id, 3: token)
+
+    //pass the parsed settings back into the top-level variable
+    apiSettings = { 
+      "hubId": match[1], 
+      "appId": match[2], 
+      "token": match[3]
+    };
+  }
+  //helper function to format the parsed data back into a base URI
+  function getBaseUrl(){
+    return `https://cloud.hubitat.com/api/${apiSettings.hubId}/apps/${apiSettings.appId}`
+  }
+  //helper function to format the token into an axios 'data' object to attach the token as a parameter
+  function getAxiosConfig(){
+    return {params: {access_token: apiSettings.token}};
+  }
+
+/******************** BUILD CHART DATA ARRAY ********************/ 
+function dataArrayParse() {
+  return getThing().then(function(thing){      //try to find the desired parameter
+      let attribute = thing.attributes.find(function(attr){ return attr.name === tileSettings.attribute});
+      //if we didn't get the attribute, bail out
+      if(attribute == null) return showError("Could not find desired attribute");
+      //otherwise inject the attribute value as HTML
+      contentEl.innerHTML = attribute.currentValue //this approach just replaces the HTML which is more efficient, but can result in image flicker
+ // Put Data into chart array 
+  x = x + 1.0; // Incriment Data interval count
+  if (tileSettings.badValues && contentEl.innerHTML == 0) {y = y;}
+    else y = parseFloat(contentEl.innerHTML);
+  contentE2.innerHTML = y + tileSettings.dataUnits;  // Load current Value, Non-Chart related
+  
+  maxDataCount = x;
+  dataArray.push(x); // Add new element to array
+  hubDataArray.push(y);
+      
+    chartArray[0] = ['X', 'Y']; // column titles
+        for (i = 0; i < maxDataCount; i++) {
+		   chartArray[i + 1] = [dataArray[i], hubDataArray[i]];
+           }  
+  // Remove array element if its x position already past off chart, to reduce array size  
+  if (x-1 > tileSettings.XaxisSpan) {
+    chartArray.splice(1, 1); 
+  }  
+  google.charts.setOnLoadCallback(drawChart); // After data, draw chart
+    }).catch(function(error){
+      showError(error.message);
+    });  
+  }
+/******************** SET CHART DATA AND DRAW ********************/ 
+function drawChart(){
+ var data = google.visualization.arrayToDataTable(chartArray, false); //'false' means that the first row contains labels, not data.
+ 
+// Build X-Axis ticks and grid
+  var XaxisTick0; // Left min
+  var XaxisTick2; // Right max
+  
+  // Auto Scale X-Axis
+  if (x > tileSettings.XaxisSpan) {XaxisTick0 = 1 + (x - tileSettings.XaxisSpan);}
+  	else XaxisTick0 = 1;
+  if (x > tileSettings.XaxisSpan) {XaxisTick2 = x;}
+  	else XaxisTick2 = tileSettings.XaxisSpan;
+    
+// Build Y-Axis ticks and grid
+  if (startValue == true) {
+    YaxisTick0 = y * 0.99;
+    YaxisTick4 = y * 1.01;
+    startValue = false; // Disable initialize value
+  }
+  if (y <  YaxisTick0) {YaxisTick0 = y * 0.99;}
+  if (y >  YaxisTick4) {YaxisTick4 = y * 1.01;}
+      
+/******************** SET CHART AREA PARAMETERS ********************/ 
+  var options = {
+    //chartArea: {  width: '100%'}, 
+    chartArea: {top: '25%',  width: '100%', height: '75%'},// Chart deadspace and vert padding
+    //theme: 'maximized',  // puts all axis & titles inside chart
+    //titlePosition: 'in', // Move title in chart
+    //titlePosition: 'center',
+    //axisTitlesPosition: 'in',
+    curveType: 'function', // 'function' for title curves Lines
+    //title: chartTitleDisplay,
+    //titleTextStyle: {fontSize: tileSettings.fontSize, bold: false, color: '#FFFFFF'},
+    legend: 'none',
+    series: {
+            0: {lineWidth: 2, color: tileSettings.lineColor} // color: '#FFFF00'
+            },
+    areaOpacity: '.75', // Opacity under line
+    backgroundColor: 'transparent',  //backgroundColor: '#f1f8e9'
+    hAxis: {
+      //title: 'Span',
+      //textStyle:{fontSize: 10, bold: false, italic: true, color: '#FFFFFF'},
+      gridlineColor: 'transparent',   //'#FFFFFF',   'transparent'
+      //baselineColor: 'transparent',
+      //format:'#',  // Remove decimals if any
+      //gridlines: {count: 2},
+      //minorGridlines: {count: 2}, 
+      viewWindow: {min: XaxisTick0, max: XaxisTick2},
+      //ticks: [XaxisTick0, XaxisTick2] // Axis grid and display labels
+    	},
+    vAxis: {
+      //title: 'Temp',
+      //textStyle:{fontSize: 10, bold: false, italic: true, color: '#FFFFFF'},
+      gridlineColor: 'transparent',   //'#FFFFFF',   'transparent'
+      //baselineColor: '#FFFFFF',
+      //format:'#',  // Remove decimals if any
+      //viewWindowMode: 'pretty', // Scale to keep points inside
+      viewWindow: {min: YaxisTick0, max: YaxisTick4},
+      //gridlines: {count: 2},
+      //minorGridlines: {count: 2}, 
+      //ticks: [YaxisTick0, YaxisTick1, YaxisTick2, YaxisTick3, YaxisTick4] // Axis grid and display labels
+       },
+    };
+
+  var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+  chart.draw(data, options);
+}
+
+/******************** SNAG ATTRIBUTE FROM HUB ********************/ 
+function getThing(){
+    let url = getBaseUrl() + `/devices/${tileSettings.deviceId}`
+    let config = getAxiosConfig();
+   
+    //make the API call
+    return axios.get(url, config).then(function(response){
+      //if we got a response with the expected base data
+      if(response.data && response.data.attributes){
+        //return the response
+        return response.data; //TODO: we could parse it into a more helpful "Thing" object format
+      }
+    }).catch(function(error){
+      showError("Error communicating with Maker API")
+    })
+  }  
+/********************** REFRESH INTERVAL ************************/  
+  function valuePollingScheduler(){
+    dataArrayParse().then(function(){
+    var refreshIntervCalc = tileSettings.refreshInterv
+    console.log("polling value in minutes");
+    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
+  });
+  }
+
+//helper method for logging an error to console, showing a toast, and updating the tile to display 'Error'
+  function showError(message){
+    console.error(message);
+    stio.showToast(message, "red");
+    contentEl.innerText = "Error";
+  }
+  
+</script>
