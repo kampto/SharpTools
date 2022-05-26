@@ -7,7 +7,7 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
+    {"name": "apiSample", "type": "STRING", "label": "Hubitat Maker API URL"},
     {"type": "STRING", "label": "Hubitat Device ID", "name": "deviceId"},
     {
       "label": "Enter Attribute name (temperature, humidity, etc..)",
