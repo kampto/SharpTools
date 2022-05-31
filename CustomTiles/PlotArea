@@ -7,57 +7,52 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "label": "Hubitat Maker API URL", "type": "STRING"},
-    {"type": "STRING", "label": "Hubitat Device ID", "name": "deviceId"},
+    {"name": "apiSample", "type": "STRING", "label": "Hubitat Maker API URL"},
+    {"name": "deviceId", "type": "STRING", "label": "Hubitat Device ID"},
     {
-      "name": "attribute",
       "label": "Enter Attribute name (temperature, humidity, etc..)",
-      "type": "STRING"
+      "type": "STRING",
+      "name": "attribute"
     },
     {
-      "label": "Data Request Interval Minutes (default = 5)",
       "name": "refreshInterv",
-      "type": "NUMBER"
+      "type": "NUMBER",
+      "label": "Data Request Interval Minutes (default = 5)"
     },
     {
-      "label": "Data Units; °F, W, %, etc.. (default = none)",
       "name": "dataUnits",
+      "label": "Data Units; °F, W, %, etc.. (default = none)",
       "type": "STRING"
     },
     {
       "label": "X-Axis data span, # points on axis (default = 20)",
-      "type": "NUMBER",
-      "name": "XaxisSpan"
+      "name": "XaxisSpan",
+      "type": "NUMBER"
     },
     {
-      "type": "BOOLEAN",
       "label": "Skip zero values?  (default = No)",
+      "type": "BOOLEAN",
       "name": "badValues"
     },
     {
-      "type": "NUMBER",
       "label": "Data Font Size  (default = 20)",
+      "type": "NUMBER",
       "name": "fontSize"
     },
     {
-      "name": "verticalPos",
       "label": "Current value vertical position; 0 to 100,  (default = 50, middle)",
+      "name": "verticalPos",
       "type": "STRING"
     },
     {
+      "name": "fontColor",
       "type": "STRING",
-      "label": "Data Font Color;  red, blue, black, etc.. (default = white)",
-      "name": "fontColor"
+      "label": "Data Font Color;  red, blue, black, etc.. (default = white)"
     },
     {
+      "label": "Line Color;  orange, red, black, etc.. (default = yellow)",
       "type": "STRING",
-      "name": "lineColor",
-      "label": "Line Color;  orange, red, black, etc.. (default = yellow)"
-    },
-    {
-      "name": "yRange",
-      "label": "[BETA] Fix the Y axis range, enter range number, (default = 0, off).  If your plot goes flat after a while enter a fixed range instead of it auto scaling Y-Axis.",
-      "type": "NUMBER"
+      "name": "lineColor"
     }
   ],
   "name": "Plot Area"
@@ -139,8 +134,6 @@ google.charts.load('current', {packages: ['corechart', 'line']});
     	{tileSettings.chartTitle = "";}  
   if(tileSettings.dataUnits == null || tileSettings.dataUnits == "")
     	{tileSettings.dataUnits = "";}  
-  if(tileSettings.yRange == null || tileSettings.yRange == "")
-    	{tileSettings.yRange = 0;}    
   if(tileSettings.fontSize == null || tileSettings.fontSize == "")
     	{tileSettings.fontSize = 15;}  // Default if no entry
     var tileFontSize = tileSettings.fontSize + 'px';
@@ -198,7 +191,8 @@ function dataArrayParse() {
       if(attribute == null) return showError("Could not find desired attribute");
       //otherwise inject the attribute value as HTML
       contentEl.innerHTML = attribute.currentValue //this approach just replaces the HTML which is more efficient, but can result in image flicker
- // Put Data into chart array 
+ 
+  // Put Data into chart array 
   x = x + 1.0; // Incriment Data interval count
   if (tileSettings.badValues && contentEl.innerHTML == 0) {y = y;}
     else y = parseFloat(contentEl.innerHTML);
@@ -241,13 +235,24 @@ function drawChart(){
     YaxisTick4 = y * 1.01;
     startValue = false; // Disable initialize value
   }
+  
+  // Rescale Y-Axis historical scale
+  if (maxDataCount > (tileSettings.XaxisSpan-1)) {
+    for (i = (maxDataCount-(tileSettings.XaxisSpan-1)); i < maxDataCount; i++) {
+		   	if (hubDataArray[i] > hubDataArray[(i-1)] )  {YaxisTick4 = hubDataArray[i]*1.01;}
+      		if (hubDataArray[i] < hubDataArray[(i-1)] )  {YaxisTick0 = hubDataArray[i]*0.99; }
+           }  
+    	}
+   
+  // Auto Y-axis Scale
   if (y <  YaxisTick0) {YaxisTick0 = y * 0.99;}
   if (y >  YaxisTick4) {YaxisTick4 = y * 1.01;}
+
   
-  if (tileSettings.yRange !=0 && startValue == false) {
-   if (y + tileSettings.yRange/2 < YaxisTick4) {YaxisTick4 = y + tileSettings.yRange/2;}
-   if (y - tileSettings.yRange/2 > YaxisTick0) {YaxisTick0 = y - tileSettings.yRange/2;}
-   }
+  //if (tileSettings.yRange !=0 && startValue == false) {
+   //if (y + tileSettings.yRange/2 < YaxisTick4) {YaxisTick4 = y + tileSettings.yRange/2;}
+   //if (y - tileSettings.yRange/2 > YaxisTick0) {YaxisTick0 = y - tileSettings.yRange/2;}
+   //}
   
       
 /******************** SET CHART AREA PARAMETERS ********************/ 
@@ -258,7 +263,7 @@ function drawChart(){
     series: {
             0: {lineWidth: 2, color: tileSettings.lineColor} // color: '#FFFF00'
             },
-    areaOpacity: '.75', // Opacity under line
+    areaOpacity: '.6', // Opacity under line
     backgroundColor: 'transparent',  //backgroundColor: '#f1f8e9'
     hAxis: {
       gridlineColor: 'transparent',   //'#FFFFFF',   'transparent'
