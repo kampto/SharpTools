@@ -1,28 +1,28 @@
 <!-- kampto  ver. May09-2021, for SharpTools -->
 <!-- Do not edit below -->
 <!-- Import URL
-https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkampto%2FSharpTools%2Fmain%2FCustomTiles%2FPlotArea
+https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkampto%2FSharpTools%2Fmain%2FCustomTiles%2FPlotArea.html
 -->
 <script type="application/json" id="tile-settings">
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "type": "STRING", "label": "Hubitat Maker API URL"},
+    {"label": "Hubitat Maker API URL", "name": "apiSample", "type": "STRING"},
     {"name": "deviceId", "type": "STRING", "label": "Hubitat Device ID"},
     {
+      "name": "attribute",
       "label": "Enter Attribute name (temperature, humidity, etc..)",
-      "type": "STRING",
-      "name": "attribute"
+      "type": "STRING"
     },
     {
-      "name": "refreshInterv",
       "type": "NUMBER",
+      "name": "refreshInterv",
       "label": "Data Request Interval Minutes (default = 5)"
     },
     {
       "name": "dataUnits",
-      "label": "Data Units; °F, W, %, etc.. (default = none)",
-      "type": "STRING"
+      "type": "STRING",
+      "label": "Data Units; °F, W, %, etc.. (default = none)"
     },
     {
       "label": "X-Axis data span, # points on axis (default = 20)",
@@ -30,29 +30,29 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
       "type": "NUMBER"
     },
     {
-      "label": "Skip zero values?  (default = No)",
       "type": "BOOLEAN",
-      "name": "badValues"
+      "name": "badValues",
+      "label": "Skip zero values?  (default = No)"
     },
     {
-      "label": "Data Font Size  (default = 20)",
       "type": "NUMBER",
-      "name": "fontSize"
+      "name": "fontSize",
+      "label": "Data Font Size  (default = 20)"
     },
     {
-      "label": "Current value vertical position; 0 to 100,  (default = 50, middle)",
       "name": "verticalPos",
-      "type": "STRING"
+      "type": "STRING",
+      "label": "Current value vertical position; 0 to 100,  (default = 50, middle)"
     },
     {
-      "name": "fontColor",
       "type": "STRING",
+      "name": "fontColor",
       "label": "Data Font Color;  red, blue, black, etc.. (default = white)"
     },
     {
-      "label": "Line Color;  orange, red, black, etc.. (default = yellow)",
+      "name": "lineColor",
       "type": "STRING",
-      "name": "lineColor"
+      "label": "Line Color;  orange, red, black, etc.. (default = yellow)"
     }
   ],
   "name": "Plot Area"
@@ -87,8 +87,7 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
   .#value {
     color: white;  /* Or use Hex like   color: #FF0000;  */
     font-size: 10px;
-    
-    }
+   }
 </style>
 
 <script>
@@ -104,9 +103,9 @@ var y = 0.0;
 var dataArray = new Array();
 var chartArray = new Array();
 var hubDataArray = new Array();
-var YaxisTick0 = 80;
-var YaxisTick4 = 80;   
-var startValue = true; // initialize the starting value  
+var YaxisTick0 =  999999;
+var YaxisTick4 = -999999;   
+//var startValue = true; // initialize the starting value  
 var contentEl = document.getElementById("chart_div");
 var contentE2 = document.getElementById("value"); // Non-Chart related
 maxDataCount = 0;
@@ -229,32 +228,24 @@ function drawChart(){
   if (x > tileSettings.XaxisSpan) {XaxisTick2 = x;}
   	else XaxisTick2 = tileSettings.XaxisSpan;
     
-// Build Y-Axis ticks and grid
-  if (startValue == true) {
-    YaxisTick0 = y * 0.99;
-    YaxisTick4 = y * 1.01;
-    startValue = false; // Disable initialize value
-  }
-  
-  // Rescale Y-Axis historical scale
-  if (maxDataCount > (tileSettings.XaxisSpan-1)) {
+// Scale Y-Axis before X-Span is reached
+  if (maxDataCount < (tileSettings.XaxisSpan-1)) {
+    //if (startValue == true) {
+    if (y <  YaxisTick0) {YaxisTick0 = y * 0.99;}
+  	if (y >  YaxisTick4) {YaxisTick4 = y * 1.01;}
+    }
+// Rescale Y-Axis after X-Span is reached  
+  else {
+    var yMax = -999999;
+    var yMin =  999999;
     for (i = (maxDataCount-(tileSettings.XaxisSpan-1)); i < maxDataCount; i++) {
-		   	if (hubDataArray[i] > hubDataArray[(i-1)] )  {YaxisTick4 = hubDataArray[i]*1.01;}
-      		if (hubDataArray[i] < hubDataArray[(i-1)] )  {YaxisTick0 = hubDataArray[i]*0.99; }
-           }  
-    	}
-   
-  // Auto Y-axis Scale
-  if (y <  YaxisTick0) {YaxisTick0 = y * 0.99;}
-  if (y >  YaxisTick4) {YaxisTick4 = y * 1.01;}
-
-  
-  //if (tileSettings.yRange !=0 && startValue == false) {
-   //if (y + tileSettings.yRange/2 < YaxisTick4) {YaxisTick4 = y + tileSettings.yRange/2;}
-   //if (y - tileSettings.yRange/2 > YaxisTick0) {YaxisTick0 = y - tileSettings.yRange/2;}
-   //}
-  
-      
+      if (hubDataArray[i] > yMax) {
+        yMax = hubDataArray[i]; YaxisTick4 = yMax*1.01;}
+      if (hubDataArray[i] < yMin) {
+        yMin = hubDataArray[i]; YaxisTick0 = yMin*0.99;}
+        }  
+     }   
+          
 /******************** SET CHART AREA PARAMETERS ********************/ 
   var options = {
     chartArea: {top: '25%',  width: '100%', height: '75%'},// Chart deadspace and vert padding
