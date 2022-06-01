@@ -70,7 +70,7 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
 </div>
 
 <style>
-/******************** SET CHART SIZE WITHIN TILE ********************/
+/******************** SET CHART CONTENT FORMATTING ********************/
   html,body {height: 100%; width: 100%; margin:0%; justify-content: center;}
   #chart_div {height: 100%; width: 104%; 
               margin-left:-1%; content: center; position:fixed;} 
@@ -91,12 +91,8 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
 </style>
 
 <script>
-//Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
-var tileSettings = { 
-  	// apiSample: "https://cloud.hubitat.com/api/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/apps/999/devices?access_token=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
-    // deviceId: "185",
-    // attribute: "temperature"
-    }
+/*************** INITIALIZE AND SET EVERYTHING UP **************/
+var tileSettings = {};
 var apiSettings = {};
 var x = 0.0;
 var y = 0.0;
@@ -105,10 +101,9 @@ var chartArray = new Array();
 var hubDataArray = new Array();
 var YaxisTick0 =  999999;
 var YaxisTick4 = -999999;   
-//var startValue = true; // initialize the starting value  
-var contentEl = document.getElementById("chart_div");
+var contentEl = document.getElementById("chart_div"); //Main Value
 var contentE2 = document.getElementById("value"); // Non-Chart related
-maxDataCount = 0;
+var maxDataCount = 0;
 google.charts.load('current', {packages: ['corechart', 'line']});
 
  //when the tile is ready, get the settings from the callback
@@ -214,7 +209,7 @@ function dataArrayParse() {
       showError(error.message);
     });  
   }
-/******************** SET CHART DATA AND DRAW ********************/ 
+/******************** SET CHART AXIS BOUNDS ********************/ 
 function drawChart(){
  var data = google.visualization.arrayToDataTable(chartArray, false); //'false' means that the first row contains labels, not data.
  
