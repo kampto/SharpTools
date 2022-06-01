@@ -1,83 +1,116 @@
-<!-- kampto  ver. June03-2021, for SharpTools -->
-<!-- Do not edit below -->
+<!-- kampto  ver. June03-2021, for SharpTools
+Dowload URL: https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkampto%2FSharpTools%2Fmain%2FCustomTiles%2FCountUPorDownTimer.html
+<!--Do not edit below this line-->
 <script type="application/json" id="tile-settings">
 {
   "schema": "0.1.0",
   "settings": [
     {
-      "label": "Stop (or Start) target Date, Use this Format:  Jan 1, 2022 15:00:00",
+      "name": "countUp",
+      "type": "BOOLEAN",
+      "label": "Count Up instead of Down?  (default = No).  Date/Time input becomes starting date/time"
+    },
+    {
       "name": "targetDate",
-      "type": "STRING"
-    },
-    {
-      "label": "Count Up instead of Down?  (default = No)",
-      "type": "BOOLEAN",
-      "name": "countUp"
-    },
-    {
-      "name": "expMSG",
       "type": "STRING",
-      "label": "Timer Expire Message  (default = EXPIRED)"
-    },
-    {
-      "label": "Font Size  (default = 130)",
-      "type": "NUMBER",
-      "name": "fontSize"
-    },
-    {
-      "label": "Show Weeks + Days, 2-row?  (default = No)",
-      "name": "showWeeksDays",
-      "type": "BOOLEAN"
-    },
-    {
-      "type": "BOOLEAN",
-      "name": "daysOnly",
-      "label": "Show Days Only, 1-row?    (default = No)"
-    },
-    {
-      "type": "BOOLEAN",
-      "name": "showDayHours",
-      "label": "Show Days+Hours, 2-row?  (default = No)"
-    },
-    {
-      "name": "showDayHoursSingleRow",
-      "label": "Show Days+Hours, 1-row? (default = No)",
-      "type": "BOOLEAN"
+      "label": "Count Down Target Date or Count Up Start Date,  Use this Format:  Jan 1, 2022 15:00:00 or Jan 1, 2022"
     },
     {
       "name": "expDays",
       "type": "NUMBER",
-      "label": "Count-Up, Expiration Days? (default = 1000, from start date)"
+      "label": "Count Up Expiration Days from Start/Target date? (default = 1000). Only applies if using COUNT UP"
+    },
+    {
+      "type": "STRING",
+      "name": "expMSG",
+      "label": "Timer Expire Message  (default = EXPIRED). Will display when target reached."
+    },
+    {
+      "type": "BOOLEAN",
+      "label": "Show Weeks + Days, 2-row?  (default = No)",
+      "name": "showWeeksDays"
+    },
+    {
+      "type": "BOOLEAN",
+      "label": "Show Days Only, 1-row?    (default = No)",
+      "name": "daysOnly"
+    },
+    {
+      "name": "showDayHours",
+      "label": "Show Days+Hours, 2-row?  (default = No)",
+      "type": "BOOLEAN"
+    },
+    {
+      "label": "Show Days+Hours, 1-row? (default = No)",
+      "type": "BOOLEAN",
+      "name": "showDayHoursSingleRow"
+    },
+    {
+      "label": "Main content Font Size  (default = 130)",
+      "type": "NUMBER",
+      "name": "fontSize"
+    },
+    {
+      "type": "STRING",
+      "name": "verticalPos",
+      "label": "Main content vertical position; 0 to 100,  (default = center, ~40)"
     },
     {
       "name": "fontColor",
       "type": "STRING",
-      "label": "Font Color;  red, blue, black, etc.. (default = white)"
+      "label": "Main content Font Color;  red, blue, black, etc.. Or use Hex code.  (default = white)"
     },
     {
-      "label": "Expired Tile Color;  red, blue, black, etc.. (default = none)",
-      "type": "STRING",
-      "name": "expColor"
+      "name": "expColor",
+      "label": "Expired Tile Color;  red, blue, black, etc.. Or use Hex code.  (default = none)",
+      "type": "STRING"
     },
     {
-      "label": "Pulse content when counter expires? (default = No)",
+      "type": "BOOLEAN",
       "name": "expPulse",
-      "type": "BOOLEAN"
+      "label": "Pulse content when counter expires? (default = No)"
+    },
+    {
+      "type": "BOOLEAN",
+      "label": "Show Reset Button? (default = No)   COUNT DOWN: will reset to specified reset date.  COUNT UP: will reset to Now time.",
+      "name": "resetCount"
+    },
+    {
+      "label": "Make Reset button transparent or hidden but still there on hover? (default = No). Only applies if using Reset button",
+      "type": "BOOLEAN",
+      "name": "hideReset"
+    },
+    {
+      "label": "Display Expiration Target Date/Time on bottom of tile?  (default = No)",
+      "type": "BOOLEAN",
+      "name": "expAttr"
+    },
+    {
+      "name": "targetDate2",
+      "type": "STRING",
+      "label": "Count Down timer next Target after a Reset. Only applies if Reset is enabled. Use this format: Jan 1, 2022 15:00:00 or Jan 1, 2022"
     }
   ],
-  "name": "Count Up/Down Timer",
+  "name": "Count Up/Down Timer test",
   "dimensions": {"width": 2, "height": 2}
 }
 </script>
 <!-- Do not edit above -->
 <script src="//cdn.sharptools.io/js/custom-tiles.js"></script>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<div class="main-content">
-  <span id="content"><span data-index="0">Loading...</span></span>
-</div>
 
-<!--**************** SET TILE & CONTENT FORMAT *****************-->
+<div class="main-content">
+  <span id="content"><span data-index="0">Loading...</span>
+</span></div>
+
+<div class="expAttr"> 
+  <span id="expAttr" <span="" data-index="0" <="" span="">
+</span></div>
+
+<button id="button1" type="button" class="button1" onclick="resetCount()"> 
+    Reset  </button>
+
 <style>
+/******************** SET CONTENT FORMATTING ********************/
   html,body {height: 100%; margin:0;}
   .main-content {
     line-height: 1.0; 
@@ -90,10 +123,43 @@
   .main-content #content {
     font-size: 80%;  /* Change Font Size, tile editor can override */
     text-align: center; 
+    position: center;  /* added */
+    top: 20%; /* added */
   	color: white;  /* Or use Hex like   color: #FF0000;  */
     animation: none;
     }
+  .expAttr {
+    width: 100%;
+    position: absolute;
+    text-align: center;
+  	top: 90%;
+  	left: 50%;
+  	transform: translate(-50%, -50%);
+    font-size: 10px;
+    color: white;  /* Or use Hex like   color: #FF0000;  */
+    /*font-size: 16vw; /* % of the viewport width */
+    }
   
+  .button1 {
+	top:80%;
+    height:18%;
+   	left:27%;
+    width:46%; /* Button width, center is leftx2 + width = 100 */
+    position: absolute;
+   	background-color: transparent; /* #4CAF50;  Green */
+  	border: 1px solid white;  /*  or none; */
+  	border-radius: 3px;
+  	color: white;
+    padding: 0px 0px;  /* text position relative to sides */
+    text-align: center;
+    font-size: 14vw; /* % of the viewport width */
+    /*opacity: 0 /* To hide button */
+    }
+  .button1:hover {
+  	background-color: white;
+  	opacity: 0.6; /* 0 To hide button */
+ 	}
+
 /* Text blink details */
 @keyframes blinkMe {
  0% { opacity: 0;}
@@ -103,18 +169,17 @@
 </style>
 
 <script>
-var contentEl = document.getElementById("content");
 var refresh = 1000; // starting refresh interval 
 
- //when the tile is ready, get the settings from the callback
+//when the tile is ready, get the settings from the callback
   stio.ready(function(data){
     tileSettings = data.settings; //Tile editor settings
     defaultSettings();  //and initialize the tile
   });
 
 /******************** DEFAULT TILE SETTINGS ********************/
- function defaultSettings(){
-    if(tileSettings.daysOnly == null || tileSettings.daysOnly == "")
+function defaultSettings(){
+  	if(tileSettings.daysOnly == null || tileSettings.daysOnly == "")
     	{tileSettings.daysOnly = false;} 
     if(tileSettings.showDayHours == null || tileSettings.showDayHours == "")
     	{tileSettings.showDayHours = false;} 
@@ -130,22 +195,66 @@ var refresh = 1000; // starting refresh interval
     	{tileSettings.expColor = "none";}  
    	if(tileSettings.expDays == null || tileSettings.expDays == "")
     	{tileSettings.expDays = 1000;}  
-   	if(tileSettings.expPulse == null || tileSettings.expPulse == "")
+	if(tileSettings.targetDate2 == null || tileSettings.targetDate2 == "")
+    	{tileSettings.targetDate2 = tileSettings.targetDate;}  
+  	 	
+  	if(tileSettings.verticalPos == null || tileSettings.verticalPos == "")
+    	{document.getElementById('content').style.setProperty('position', 'center', 'important');}  // Default if no entry
+    	else {var tileVerticalPos = tileSettings.verticalPos + '%';
+		document.getElementById('content').style.setProperty('top', tileVerticalPos, 'important');
+        document.getElementById('content').style.setProperty('position', 'absolute', 'important');}
+   
+   	if(tileSettings.resetCount == null || tileSettings.resetCount == "")
+    	{tileSettings.resetCount = false;} 
+	 	if (tileSettings.resetCount == false){
+   		document.getElementById('button1').style.display="none";  
+        } 
+    
+    if(tileSettings.hideReset == null || tileSettings.hideReset == "")
+    	{tileSettings.hideReset = false;} 
+	 	if (tileSettings.hideReset == true){
+   		document.getElementById('button1').style.setProperty('border', 'none', 'important');
+        document.getElementById('button1').style.setProperty('color', 'transparent', 'important');
+        } 
+  
+   	if(tileSettings.expAttr == null || tileSettings.expAttr == "")
+    	{tileSettings.expAttr = false;} 
+	 	if (tileSettings.expAttr == false){
+   		document.getElementById('expAttr').style.display="none";  
+        } 
+  
+	if(tileSettings.expPulse == null || tileSettings.expPulse == "")
     	{tileSettings.expPulse = false;} 
-   		var animationString = "none";
-	if(tileSettings.fontSize == null || tileSettings.fontSize == "")
+   		var animationString = "none";   		
+	
+   	if(tileSettings.fontSize == null || tileSettings.fontSize == "")
     	{tileSettings.fontSize = 130;}  
-   	    var tileFontSize = tileSettings.fontSize + '%';
+   		var tileFontSize = tileSettings.fontSize + '%';   	    
    		document.documentElement.style.setProperty('font-size', tileFontSize, 'important');  // Pass value into style variable
-   if(tileSettings.fontColor == null || tileSettings.fontColor == "")
+   
+   	if(tileSettings.fontColor == null || tileSettings.fontColor == "")
     	{tileSettings.fontColor = "white";}  
 		document.getElementById("content").style.color = tileSettings.fontColor;
- }  
+  		document.getElementById('expAttr').style.setProperty('color', tileSettings.fontColor, 'important');
+  	}  
 
+// if Count-Up restart button is pushed update start time to Now
+function resetCount() {
+  	if (tileSettings.countUp) {
+		var today = new Date();
+		var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+		var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+		var dateTime = date+' '+time;
+ 		tileSettings.targetDate = dateTime;
+  		}
+  	else {tileSettings.targetDate = tileSettings.targetDate2;}
+	}
+  
 var x = setInterval(function() {
   var countDownDate = new Date(tileSettings.targetDate).getTime();
   var now = new Date().getTime(); // Get today's date and time
-  // Find the distance between now and the count down date
+ 
+  // Find the distance between now and the count down/up date
   if (tileSettings.countUp) {var distance = now - countDownDate;}
   else {var distance = countDownDate - now;}
   
@@ -157,23 +266,30 @@ var x = setInterval(function() {
   var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
   var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-  // If the counter is finished, display some text and formatting
+  // If the counter is finished, display some formatting
   if ((tileSettings.countUp == false && distance < 0) || (tileSettings.countUp && days >= tileSettings.expDays)){
     var expired = true; animationString = "blinkMe 1.5s linear infinite";}
   	else {var expired = false; 
       document.documentElement.style.removeProperty('background-color');
       animationString = "none"
          }
-    
-  if (expired) { clearInterval(x); 
+  
+  // 2nd bottom Attribute
+  if (tileSettings.expAttr) {
+  	if (tileSettings.countUp == true) { 
+  		document.getElementById("expAttr").innerHTML = "exp " + tileSettings.expDays + " days";}
+  	else  {document.getElementById("expAttr").innerHTML = tileSettings.targetDate;}  
+   }
+  // Primary Attribute
+  if (expired) {clearInterval(x); 
     document.getElementById("content").innerHTML = tileSettings.expMSG;
    	document.documentElement.style.setProperty('background-color', tileSettings.expColor, 'important');
   	if (tileSettings.expPulse) {
       document.getElementById("content").style.animation = animationString;
        	}
      }
-      
-  // Display the result and time format
+
+  // Display the result in the element with id="content"
   else if (tileSettings.showWeeksDays == true) {
   	if (weeks >= 1) {document.getElementById("content").innerHTML = weeks + " Weeks<br>" + dayAfterweeks + " Days";}
     else if (days >= 1) {document.getElementById("content").innerHTML = days + " Days<br>" + hours + " hr";}
