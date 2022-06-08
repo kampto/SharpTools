@@ -7,52 +7,52 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
 {
   "schema": "0.1.0",
   "settings": [
-    {"label": "Hubitat Maker API URL", "name": "apiSample", "type": "STRING"},
+    {"name": "apiSample", "label": "Hubitat Maker API URL", "type": "STRING"},
     {"name": "deviceId", "type": "STRING", "label": "Hubitat Device ID"},
     {
-      "name": "attribute",
       "label": "Enter Attribute name (temperature, humidity, etc..)",
-      "type": "STRING"
+      "type": "STRING",
+      "name": "attribute"
     },
     {
-      "type": "NUMBER",
       "name": "refreshInterv",
+      "type": "NUMBER",
       "label": "Data Request Interval Minutes (default = 5)"
     },
     {
       "name": "dataUnits",
-      "type": "STRING",
-      "label": "Data Units; °F, W, %, etc.. (default = none)"
+      "label": "Data Units; °F, W, %, etc.. (default = none)",
+      "type": "STRING"
     },
     {
-      "label": "X-Axis data span, # points on axis (default = 20)",
       "name": "XaxisSpan",
-      "type": "NUMBER"
-    },
-    {
-      "type": "BOOLEAN",
-      "name": "badValues",
-      "label": "Skip zero values?  (default = No)"
-    },
-    {
       "type": "NUMBER",
-      "name": "fontSize",
-      "label": "Data Font Size  (default = 20)"
+      "label": "X-Axis data span, # points on axis (default = 20)"
     },
     {
-      "name": "verticalPos",
-      "type": "STRING",
-      "label": "Current value vertical position; 0 to 100,  (default = 50, middle)"
+      "label": "Skip zero values?  (default = No)",
+      "type": "BOOLEAN",
+      "name": "badValues"
+    },
+    {
+      "label": "Data Font Size  (default = 20)",
+      "type": "NUMBER",
+      "name": "fontSize"
     },
     {
       "type": "STRING",
+      "label": "Current value vertical position; 0 to 100,  (default = 50, middle)",
+      "name": "verticalPos"
+    },
+    {
       "name": "fontColor",
+      "type": "STRING",
       "label": "Data Font Color;  red, blue, black, etc.. (default = white)"
     },
     {
-      "name": "lineColor",
+      "label": "Line Color;  orange, red, black, etc.. (default = yellow)",
       "type": "STRING",
-      "label": "Line Color;  orange, red, black, etc.. (default = yellow)"
+      "name": "lineColor"
     }
   ],
   "name": "Plot Area"
@@ -81,7 +81,7 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
   	top: 50%;
   	left: 50%;
   	transform: translate(-50%, -50%);
-    text-shadow: 0 0 0px black; /* change 0px to 5px or other #px*/
+    text-shadow: 0 0 2px black; /* change 0px to 5px or other #px*/
     }
   
   .#value {
