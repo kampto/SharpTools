@@ -4,28 +4,28 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"type": "STRING", "name": "apiSample", "label": "Sample Maker API URL"},
-    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
-    {"name": "attribute", "label": "Enter Attribute name", "type": "STRING"},
+    {"name": "apiSample", "type": "STRING", "label": "Hubitat Maker API URL"},
+    {"type": "STRING", "name": "deviceId", "label": "Hubitat Device ID"},
+    {"label": "Enter Attribute name", "name": "attribute", "type": "STRING"},
     {
       "type": "STRING",
       "label": "Gauge Center Label (default = Humidity)",
       "name": "gaugeLabel"
     },
-    {"type": "STRING", "name": "gaugeUnits", "label": "Units (default = %)"},
+    {"label": "Units (default = %)", "name": "gaugeUnits", "type": "STRING"},
     {
-      "label": "Number of Decimals (default = 1)",
       "name": "numDecimals",
-      "type": "STRING"
+      "type": "STRING",
+      "label": "Number of Decimals (default = 1)"
     },
     {
-      "name": "refreshInterv",
       "label": "Refresh Interval Minutes (default = 10)",
-      "type": "NUMBER"
+      "type": "NUMBER",
+      "name": "refreshInterv"
     }
   ],
   "name": "Gauge Humidity",
-  "dimensions": {"width": 2, "height": 2}
+  "dimensions": {"height": 2, "width": 2}
 }
 </script>
 <!-- Do not edit Above -->
