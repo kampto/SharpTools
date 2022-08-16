@@ -4,18 +4,18 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"type": "STRING", "name": "apiSample", "label": "Sample Maker API URL"},
-    {"name": "deviceId", "label": "Device ID", "type": "STRING"},
-    {"type": "STRING", "name": "attribute", "label": "Enter Attribute name"},
+    {"type": "STRING", "name": "apiSample", "label": "Hubitat Maker API URL"},
+    {"label": "Hubitat Device ID", "type": "STRING", "name": "deviceId"},
+    {"name": "attribute", "label": "Enter Attribute name", "type": "STRING"},
     {
-      "name": "refreshInterv",
       "type": "NUMBER",
+      "name": "refreshInterv",
       "label": "Data Request Interval Minutes (default = 10)"
     },
     {
-      "type": "STRING",
+      "name": "dataUnits",
       "label": "Data Units  (default = none)",
-      "name": "dataUnits"
+      "type": "STRING"
     },
     {
       "type": "NUMBER",
@@ -23,9 +23,9 @@
       "name": "numDecimals"
     },
     {
-      "type": "NUMBER",
+      "label": "Font Size,   (default = 150)",
       "name": "fontSize",
-      "label": "Font Size,   (default = 150)"
+      "type": "NUMBER"
     }
   ],
   "name": "Hubitat Device Attribute"
