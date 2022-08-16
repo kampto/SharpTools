@@ -1,100 +1,106 @@
 <!-- kampto  ver. April25-2021, for SharpTools -->
-<!-- Do not edit below -->
+<!--Import URL  https://sharptools.io/developer/custom-tiles/import/?url=https://raw.githubusercontent.com/kampto/SharpTools/main/CustomTiles/Gauge12V.html -->
+<!-- Do not edit Below -->
 <script type="application/json" id="tile-settings">
 {
   "schema": "0.1.0",
   "settings": [
-    {"label": "Sample Maker API URL", "name": "apiSample", "type": "STRING"},
-    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
-    {"label": "Enter Attribute name", "name": "attribute", "type": "STRING"},
+    {"name": "apiSample", "label": "Hubitat Maker API URL", "type": "STRING"},
+    {"type": "STRING", "name": "deviceId", "label": "Hubitat Device ID"},
+    {"label": "Enter Attribute name", "type": "STRING", "name": "attribute"},
     {
-      "name": "refreshInterv",
+      "name": "gaugeLabel",
+      "label": "Gauge Center Label (default = Level)",
+      "type": "STRING"
+    },
+    {"type": "STRING", "label": "Units (default = %)", "name": "gaugeUnits"},
+    {
+      "name": "numDecimals",
+      "label": "Number of Decimals (default = 1)",
+      "type": "STRING"
+    },
+    {
       "type": "NUMBER",
-      "label": "Data Request Interval Minutes (default = 5)"
+      "name": "refreshInterv",
+      "label": "Refresh Interval Minutes (default = 10)"
     }
   ],
-  "name": "Tank Level",
-  "dimensions": {"height": 2, "width": 2}
+  "name": "Gauge Tank Level"
 }
 </script>
-<!-- Do not edit above -->
-<!-- SharpTools Specific below -->
+<!-- Do not edit Above -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 <script src="https://cdn.sharptools.io/js/custom-tiles.js"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<!-- anyCharts Specific below -->
-<div id="anychart-embed-samples-bct-pointers-and-data-tank-16" class="anychart-embed anychart-embed-samples-bct-pointers-and-data-tank-16">
-<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-base.min.js?hcode=a0c21fc77e1449cc86299c5faa067dc4"></script>
-<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-linear-gauge.min.js?hcode=a0c21fc77e1449cc86299c5faa067dc4"></script>
-<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-exports.min.js?hcode=a0c21fc77e1449cc86299c5faa067dc4"></script>
-<script src="https://cdn.anychart.com/releases/8.9.0/js/anychart-ui.min.js?hcode=a0c21fc77e1449cc86299c5faa067dc4"></script>
-<div id="ac_style_samples-bct-pointers-and-data-tank-16" style="display:none;">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<div id="chart" aliign="center"></div>
 
-html, body, #container {
-    width: 30%;  
-    height: 35%; 
-    margin: 0;
-    /padding: 0;
-  	padding-top: 4px;
-  	}  
-</div>
-  <style>
-  html,body {height: 100%; margin:-2%; justify-content: center; position:fixed; }
-  </style>
-  
-<script>(function(){
-function ac_add_to_head(el){
-	var head = document.getElementsByTagName('head')[0];
-	head.insertBefore(el,head.firstChild);
-}
-function ac_add_link(url){
-	var el = document.createElement('link');
-	el.rel='stylesheet';el.type='text/css';el.media='all';el.href=url;
-	ac_add_to_head(el);
-}
-function ac_add_style(css){
-	var ac_style = document.createElement('style');
-	if (ac_style.styleSheet) ac_style.styleSheet.cssText = css;
-	else ac_style.appendChild(document.createTextNode(css));
-	ac_add_to_head(ac_style);
-}
-ac_add_link('https://cdn.anychart.com/releases/8.9.0/css/anychart-ui.min.css?hcode=a0c21fc77e1449cc86299c5faa067dc4');
-ac_add_style(document.getElementById("ac_style_samples-bct-pointers-and-data-tank-16").innerHTML);
-ac_add_style(".anychart-embed-samples-bct-pointers-and-data-tank-16{width:600px;height:450px;}");
-})();</script>
-<div id="container"></div> 
-  
+<style>
+  /*************** SET GAUGE SIZE WITIN TILE ***************/
+  html,body {height: 100%; margin:-2.2%; justify-content: center; }
+  #chart {height: 110%; width: 110%; position:fixed; }
+
+</style>
+
 <script>
-/******************** SharpTool Data Parse *******************/ 
-//Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
+  /***************** SET UP GAUGE BOUNDARYS ****************/
+   	var chart, chartData;
+  	var chartOptions = {
+    min: 0, max: 100,
+    redFrom: 0, redTo: 50,
+    yellowFrom:50, yellowTo: 75,
+    greenFrom:75, greenTo: 100,
+    minorTicks: 5,
+    majorTicks: ['0', '25', '50', '75', '100'], // Major ticks adds Labels to the ticks
+  	};
+  
+  //Optional, force API URI into every tile, DO NOT SHARE CODE IF REAL API URL INSERTED BELOW
   var tileSettings = { 
     // apiSample: "https://cloud.hubitat.com/api/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX/apps/999/devices?access_token=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX", 
     // deviceId: "185",
+    // attribute: "temperature"
     }
   var apiSettings = {};
-  var contentEl = document.getElementById("container");	
   
-//when the tile is ready, get the settings from the callback
+  //Load gauge script
+  google.charts.load('current', {'packages':['gauge']});  
+  google.charts.setOnLoadCallback(initChart);  
+  
+  //get the content element so we can update it later
+  var contentEl = document.getElementById("chart");
+  //when the tile is ready, get the settings from the callback
   stio.ready(function(data){
     tileSettings = data.settings; //apiSample, deviceId, attribute
     init();  //and initialize the tile
   });
-
+ 
   function init(){
-    parseApiSample();  //parse the relevant settings out of the apiSample
-    defaultSettings();
+    //parse the relevant settings out of the apiSample
+    parseApiSample();
     valuePollingScheduler();
     }
+  
+//******************** REFRESH INTERVAL ************************/  
+  function valuePollingScheduler(){
+    refresh().then(function(){
+    var refreshIntervCalc = tileSettings.refreshInterv
+    if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
+    	{refreshIntervCalc = 10;}  // Default 10 minutes if no entry
+    console.log("polling value in minutes");
+    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
+  });
+  }
 
-/******************** DEFAULT TILE SETTINGS ********************/
-  function defaultSettings(){
-  if(tileSettings.refreshInterv == null || tileSettings.refreshInterv == "")
-    	{tileSettings.refreshInterv = 5;}  // Default if no entry
-   }
+  //helper method for logging an error to console, showing a toast, and updating the tile to display 'Error'
+  function showError(message){
+    console.error(message);
+    stio.showToast(message, "red");
+    contentEl.innerText = "Error";
+  }
 
-//parse out the various components from a provided Maker API URL
+  //parse out the various components from a provided Maker API URL
   function parseApiSample(sampleUrl){
     //if we weren't passed in an explicit URL to parse
     if(sampleUrl == null){
@@ -117,6 +123,7 @@ ac_add_style(".anychart-embed-samples-bct-pointers-and-data-tank-16{width:600px;
       "token": match[3]
     };
   }
+
   //helper function to format the parsed data back into a base URI
   function getBaseUrl(){
     return `https://cloud.hubitat.com/api/${apiSettings.hubId}/apps/${apiSettings.appId}`
@@ -126,81 +133,67 @@ ac_add_style(".anychart-embed-samples-bct-pointers-and-data-tank-16{width:600px;
     return {params: {access_token: apiSettings.token}};
   }
 
-/********************** BUILD CHART DATA  ***********************/ 
-function dataArrayParse() {
-  return getThing().then(function(thing){      //try to find the desired parameter
+function initChart() {
+    console.log("Initialize Google Chart");
+    chartData = google.visualization.arrayToDataTable([
+      ['Label', 'Value'],
+//**************** SET UP Default Gauge Center Label **************/
+      ['Volts', 0], // Default inside gauge label
+    ]);  
+    chart = new google.visualization.Gauge(document.getElementById('chart'));
+  
+  }
+  
+  function refresh(){
+    return getThing().then(function(thing){
+      //try to find the desired parameter
       let attribute = thing.attributes.find(function(attr){ return attr.name === tileSettings.attribute});
       //if we didn't get the attribute, bail out
       if(attribute == null) return showError("Could not find desired attribute");
-    var value = attribute.currentValue;    
-    contentEl.innerHTML = "";  // Change "" to attribute.currentValue to add value to chart top 
+      
+      //otherwise inject the attribute value as HTML
+      contentEl.innerHTML = attribute.currentValue //this approach just replaces the HTML which is more efficient, but can result in image flicker
 
-/******************* anyCharts Gauge Set-up ********************/ 
-  anychart.onDocumentReady(function () {
-  
-  // Parse Data into chart
-  var dataSet = anychart.data.set([value]);
-    
-  // set the gauge type
-  var gauge = anychart.gauges.linear();
-  gauge.data(dataSet);
+      initChart();  // Initalize chart again
+      
+// Piece together gauge elements and Draw   
+ 	if(chart && chartData){
+     chartData.setValue(0, 1, contentEl.innerHTML);  // Insert Data
 
-  // tank creating
-  var tank = gauge.tank(0);
-  //tank.name("\xb0F");
-  tank.color("#00bcd4", 0.8); // color
-  
-  // set the width and offset of the tank pointer (both as percentages of the gauge width)
-  tank.width('65%');
-  tank.offset('0%');
+	// Set up Units
+    var gaugeUnitsDisplay = tileSettings.gaugeUnits;
+    if(tileSettings.gaugeUnits == null || tileSettings.gaugeUnits == "")
+//********************** SET UP Default Units ********************/
+    {gaugeUnitsDisplay = "%";}  // Default unit if no entry
 
-  // Set axis scale settings
-  var scale = gauge.scale();
-  scale.minimum(0);
-  scale.maximum(100);
-  scale.ticks().interval(5);
+	// Set up number of decimals
+    var numDecimalsDisplay = tileSettings.numDecimals;
+    if (tileSettings.numDecimals == "0") {numDecimalsDisplay = "#";}
+    else if (tileSettings.numDecimals == "1") {numDecimalsDisplay = "#.#";}
+    else if (tileSettings.numDecimals == "2") {numDecimalsDisplay = "#.##";}
+    else if (tileSettings.numDecimals == "3") {numDecimalsDisplay = "#.###";}  
+    else  {numDecimalsDisplay = "#.#";}  // Default unit if no entry    
+      
+	// Apply Units and Decimals
+		var formatter = new google.visualization.NumberFormat(
+          {suffix: gaugeUnitsDisplay ,pattern:numDecimalsDisplay}  // Edit units and decimal places
+        	);
+        formatter.format(chartData,1);
 
-  // Add axis with custom labels
-  var axis = gauge.axis(0);
-  axis.minorTicks(false); // Add fine tick marks
-  axis.scale(scale);
-  axis.offset('-11%');
-    
-  // Marker settings
-  var marker = gauge.marker(0);
-  marker.type('triangle-left');  // set the marker type
-  marker.zIndex(5);  // set the zIndex of the marker
-  // set the width and offset of the marker pointer (both as percentages of the gauge width)
-  marker.width('4.5%');   
-  marker.offset('2%');
-
-  // Set background color and opacity
-  gauge.background()	
-  .fill('#FFFFFF', 0.0)
-    
-  // Set Gauge Text
-  gauge.label()
-    .fontStyle('bold') // normal, bold
-    .fontColor('Black')  // Main Level % Color
-    .text(value+'%') // data Value
-    .anchor('center') //set the position of the label
-    .adjustFontSize(true)
-    .hAlign('center')
-    .offsetY('60%') // y-axis of label
-    .offsetX('55%')
-    .width('38%') // font
-    .height('20%') // font
-    .zIndex(10);
-
-  // draw the chart
-  gauge.container("container");
-  gauge.draw();
-	});
-  }).catch(function(error){showError(error.message);});  
-}    
+	// Apply new gauge center label if entered in tile editor
+          if(tileSettings.gaugeLabel != null && tileSettings.gaugeLabel != ""){
+            chartData.setValue(0, 0, tileSettings.gaugeLabel);
+          	}
    
-/******************** SNAG ATTRIBUTE FROM HUB ********************/ 
-function getThing(){
+      chart.draw(chartData, chartOptions);   // Draw chart
+      }
+      
+    }).catch(function(error){
+      showError(error.message);
+    });
+  }
+
+  function getThing(){
     let url = getBaseUrl() + `/devices/${tileSettings.deviceId}`
     let config = getAxiosConfig();
    
@@ -214,23 +207,6 @@ function getThing(){
     }).catch(function(error){
       showError("Error communicating with Maker API")
     })
-  }  
-/********************** REFRESH INTERVAL ************************/  
-  function valuePollingScheduler(){
-    dataArrayParse().then(function(){
-    var refreshIntervCalc = tileSettings.refreshInterv
-    console.log("polling value in XX minutes");
-    setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
-  });
   }
 
-//helper method for logging an error to console, showing a toast, and updating the tile to display 'Error'
-  function showError(message){
-    console.error(message);
-    stio.showToast(message, "red");
-    contentEl.innerText = "Error";
-  }
- 
 </script>
- 
-</div>
