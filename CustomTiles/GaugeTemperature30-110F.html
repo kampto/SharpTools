@@ -4,28 +4,28 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "type": "STRING", "label": "Sample Maker API URL"},
-    {"type": "STRING", "name": "deviceId", "label": "Device ID"},
-    {"type": "STRING", "label": "Enter Attribute name", "name": "attribute"},
+    {"label": "Hubitat Maker API URL", "type": "STRING", "name": "apiSample"},
+    {"type": "STRING", "name": "deviceId", "label": "Hubitat Device ID"},
+    {"type": "STRING", "name": "attribute", "label": "Enter Attribute name"},
     {
       "name": "gaugeLabel",
-      "type": "STRING",
-      "label": "Gauge Center Label (default = Temp)"
+      "label": "Gauge Center Label (default = Temp)",
+      "type": "STRING"
     },
-    {"type": "STRING", "name": "gaugeUnits", "label": "Units (default = °F)"},
+    {"name": "gaugeUnits", "label": "Units (default = °F)", "type": "STRING"},
     {
-      "name": "numDecimals",
       "label": "Number of Decimals (default = 1)",
+      "name": "numDecimals",
       "type": "STRING"
     },
     {
-      "name": "refreshInterv",
       "label": "Refresh Interval Minutes (default = 10)",
+      "name": "refreshInterv",
       "type": "NUMBER"
     }
   ],
   "name": "Gauge Temperature 30 - 110°F",
-  "dimensions": {"height": 2, "width": 2}
+  "dimensions": {"width": 2, "height": 2}
 }
 </script>
 <!-- Do not edit Above -->
