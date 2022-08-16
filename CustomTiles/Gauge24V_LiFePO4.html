@@ -4,24 +4,24 @@
 {
   "schema": "0.1.0",
   "settings": [
-    {"type": "STRING", "label": "Sample Maker API URL", "name": "apiSample"},
-    {"label": "Device ID", "name": "deviceId", "type": "STRING"},
-    {"type": "STRING", "label": "Enter Attribute name", "name": "attribute"},
+    {"label": "Hubitat  Maker API URL", "name": "apiSample", "type": "STRING"},
+    {"label": "Hubitat Device ID", "type": "STRING", "name": "deviceId"},
+    {"name": "attribute", "label": "Enter Attribute name", "type": "STRING"},
     {
+      "label": "Gauge Center Label (default = Volts)",
       "type": "STRING",
-      "name": "gaugeLabel",
-      "label": "Gauge Center Label (default = Volts)"
+      "name": "gaugeLabel"
     },
-    {"type": "STRING", "label": "Units (default = V)", "name": "gaugeUnits"},
+    {"name": "gaugeUnits", "label": "Units (default = V)", "type": "STRING"},
     {
       "label": "Number of Decimals (default = 2)",
       "type": "STRING",
       "name": "numDecimals"
     },
     {
+      "name": "refreshInterv",
       "label": "Refresh Interval Minutes (default = 10)",
-      "type": "NUMBER",
-      "name": "refreshInterv"
+      "type": "NUMBER"
     }
   ],
   "name": "Gauge 24V LiFePO4"
