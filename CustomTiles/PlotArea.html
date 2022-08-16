@@ -7,35 +7,35 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
 {
   "schema": "0.1.0",
   "settings": [
-    {"name": "apiSample", "label": "Hubitat Maker API URL", "type": "STRING"},
-    {"name": "deviceId", "type": "STRING", "label": "Hubitat Device ID"},
+    {"type": "STRING", "label": "Hubitat Maker API URL", "name": "apiSample"},
+    {"label": "Hubitat Device ID", "name": "deviceId", "type": "STRING"},
     {
       "label": "Enter Attribute name (temperature, humidity, etc..)",
       "type": "STRING",
       "name": "attribute"
     },
     {
+      "label": "Data Request Interval Minutes (default = 5)",
       "name": "refreshInterv",
-      "type": "NUMBER",
-      "label": "Data Request Interval Minutes (default = 5)"
+      "type": "NUMBER"
     },
     {
-      "name": "dataUnits",
       "label": "Data Units; °F, W, %, etc.. (default = none)",
-      "type": "STRING"
+      "type": "STRING",
+      "name": "dataUnits"
     },
     {
-      "name": "XaxisSpan",
       "type": "NUMBER",
+      "name": "XaxisSpan",
       "label": "X-Axis data span, # points on axis (default = 20)"
     },
     {
+      "name": "badValues",
       "label": "Skip zero values?  (default = No)",
-      "type": "BOOLEAN",
-      "name": "badValues"
+      "type": "BOOLEAN"
     },
     {
-      "label": "Data Font Size  (default = 20)",
+      "label": "Data Font Size  (default = 15)",
       "type": "NUMBER",
       "name": "fontSize"
     },
@@ -45,14 +45,14 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
       "name": "verticalPos"
     },
     {
-      "name": "fontColor",
       "type": "STRING",
-      "label": "Data Font Color;  red, blue, black, etc.. (default = white)"
+      "label": "Data Font Color;  red, blue, black, etc.. (default = white)",
+      "name": "fontColor"
     },
     {
-      "label": "Line Color;  orange, red, black, etc.. (default = yellow)",
       "type": "STRING",
-      "name": "lineColor"
+      "name": "lineColor",
+      "label": "Line Color;  orange, red, black, etc.. (default = yellow)"
     }
   ],
   "name": "Plot Area"
