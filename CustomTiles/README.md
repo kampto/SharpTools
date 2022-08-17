@@ -51,8 +51,10 @@ GAUGE EXAMPLES:
 
 ![image](https://user-images.githubusercontent.com/31904505/118742984-4f9dfa80-b806-11eb-9292-bbdaef3b0e01.png)
 
-PLOT EXAMPLES:
+Genreic PLOT EXAMPLES:
 
 ![image](https://user-images.githubusercontent.com/31904505/118754204-66028100-b81b-11eb-98ec-8ee0d4b7bab2.png)
 
+Area Plot examples:
+![image](https://user-images.githubusercontent.com/31904505/185044068-427fde83-8e7d-4100-95b8-8b06617ded1f.png)
 
