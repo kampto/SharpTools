@@ -41,7 +41,7 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
     },
     {
       "type": "STRING",
-      "label": "Current value vertical position; 0 to 100,  (default = 50, middle)",
+      "label": "Current value vertical position; 0 to 100,  (default = 85, middle)",
       "name": "verticalPos"
     },
     {
@@ -55,7 +55,8 @@ https://sharptools.io/developer/custom-tiles/import/?url=https%3A%2F%2Fraw.githu
       "label": "Line Color;  orange, red, black, etc.. (default = yellow)"
     }
   ],
-  "name": "Plot Area"
+  "name": "Plot Area",
+  "dimensions": {"height": 2, "width": 3}
 }
 </script>
 <!-- Do not edit above -->
@@ -134,7 +135,7 @@ google.charts.load('current', {packages: ['corechart', 'line']});
 		document.documentElement.style
     	.setProperty('font-size', tileFontSize, 'important');  // Pass value into style variable
   if(tileSettings.verticalPos == null || tileSettings.verticalPos == "")
-    	{tileSettings.verticalPos = 50;}  // Default if no entry
+    	{tileSettings.verticalPos = 85;}  // Default if no entry
     var tileVerticalPos = tileSettings.verticalPos + '%';
 		document.getElementById('value').style
       	.setProperty('top', tileVerticalPos, 'important');
