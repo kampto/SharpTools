@@ -90,6 +90,7 @@
     console.log("polling value in minutes");
     setTimeout(valuePollingScheduler, (refreshIntervCalc * 60 * 1000)); // Millisec
   });
+  initChart();  // Initalize chart again	  
   }
 
   //helper method for logging an error to console, showing a toast, and updating the tile to display 'Error'
@@ -152,7 +153,7 @@ function initChart() {
       //otherwise inject the attribute value as HTML
       contentEl.innerHTML = attribute.currentValue //this approach just replaces the HTML which is more efficient, but can result in image flicker
 
-      initChart();  // Initalize chart again
+     //initChart();  // Initalize chart again
       
 // Piece together gauge elements and Draw   
  	if(chart && chartData){
